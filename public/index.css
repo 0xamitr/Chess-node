@@ -1,0 +1,14 @@
+.row{
+    display: flex;
+}
+
+body{
+    display: flex;
+    justify-content: center;
+}
+
+.box{
+    height: 50px;
+    width: 50px;
+    border: solid 2px black;
+}

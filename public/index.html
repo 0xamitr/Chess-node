@@ -4,13 +4,18 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="./index.css">
 </head>
 <body>
-    <h2 id="code"></h2>
-    <button id="button" style="height: 50px; width: 100px;"></button>
-    <input id="input" type="number"/>
-    <button id="submit-input"></button>
+    <div id="one">
+        <h2 id="code"></h2>
+        <button id="button" style="height: 50px; width: 100px;"></button>
+        <input id="input" type="number"/>
+        <button id="submit-input"></button>
+    </div>
+    <div id="two">
+    </div>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="./one.js"></script>
+    <script src="./one.js" type="module"></script>
 </body>
 </html>
