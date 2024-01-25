@@ -8,25 +8,26 @@ btn.addEventListener("click", () => {
     input.style.display = "none"
     document.getElementById("code").textContent = code
     socket = io()
-    socket.emit('code', {
-        code: code,
-        id: socket.id
-    });
+    socket.emit('code', code)
 })
 input.addEventListener("keyup", (e) => {
     if(e.key == "Enter"){
-        socket = io()
-        socket.emit('submit', parseInt(e.value));
-        input.value = ""
+        submit();
     }
 })
 submit_btn.addEventListener("click", ()=>{
+    submit();
+})
+
+const submit = ()=>{
     socket = io()
     socket.emit('submit', parseInt(input.value));
     input.value = ""
-})
-socket.on('hi', (msg) => {
-    const item = document.createElement('li');
-    item.textContent = msg;
-    document.appendChild(item);
-  });
+    socket.on('roomfull', ()=>{
+        alert("roomfull")
+    })
+    socket.on('connection_established', ()=>{
+        console.log("fasf")
+        alert("connection")
+    })
+}
