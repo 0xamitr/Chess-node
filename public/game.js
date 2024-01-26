@@ -13,7 +13,7 @@ function Game(){
                 boxes.classList.add("occupied")
             }
             if(i == 7 && j==7){
-                boxes.classList.add("queen")
+                boxes.classList.add("rook")
 
             }
             boxes.id = `${i},${j}`
@@ -66,16 +66,36 @@ function possibleMoves(elem){
     pos[0] = parseInt(pos[0])
     pos[1] = parseInt(pos[1])
     if(elem.classList.contains("knight")){
-
+        let temp
+        const a = [-2, -1, 1, 2]
+        for (let i = 0; i < a.length; i++) {
+            for (let j = 0; j < a.length; j++) {
+                if (Math.abs(a[i]) + Math.abs(a[j]) === 3) {
+                    temp = pos.slice();
+                    console.log(temp);
+                    console.log("Fsdaf")
+                    temp[0] = temp[0] + a[i];
+                    temp[1] = temp[1] + a[j];
+                    if (temp[0] < 0 || temp[0] > 7 || temp[1] < 0 || temp[1] > 7) {
+                        console.log("Fsdf")
+                        continue;
+                    }
+                    const toshow = document.getElementById(`${temp[0]},${temp[1]}`);
+                    toshow.classList.add("show");
+                    if (toshow.classList.contains("occupied")) {
+                        continue;
+                    }
+                }
+            }
+        }
     }
     else if(elem.classList.contains("queen")){
-        let temp;
         for(let i = -1; i < 2; i++){
             for(let j = -1; j < 2; j++){
                 if(i == 0 && j == 0){
                     continue;
                 }
-                temp = pos.slice();
+                let temp = pos.slice();
                 console.log(temp)
                 while(true){
                     temp[0] = temp[0] + i;
@@ -93,13 +113,51 @@ function possibleMoves(elem){
         }
     }
     else if(elem.classList.contains("bishop")){
-
+        for(let i = -1; i < 2; i++){
+            for(let j = -1; j < 2; j++){
+                if(Math.abs(i) == Math.abs(j) && i != 0){
+                    let temp = pos.slice();
+                    console.log(temp)
+                    while(true){
+                        temp[0] = temp[0] + i;
+                        temp[1] = temp[1] + j;
+                        if((temp[0] < 0 || temp[0] > 7 || temp[1] < 0 || temp[1] > 7)){
+                            break;
+                        }
+                        const toshow = document.getElementById(`${temp[0]},${temp[1]}`)
+                        toshow.classList.add("show")
+                        if(toshow.classList.contains("occupied")){
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
     else if(elem.classList.contains("pawn")){
 
     }
     else if(elem.classList.contains("rook")){
-
+        for(let i = -1; i < 2; i++){
+            for(let j = -1; j < 2; j++){
+                if(Math.abs(i - j) == 1){
+                    let temp = pos.slice();
+                    console.log(temp)
+                    while(true){
+                        temp[0] = temp[0] + i;
+                        temp[1] = temp[1] + j;
+                        if((temp[0] < 0 || temp[0] > 7 || temp[1] < 0 || temp[1] > 7)){
+                            break;
+                        }
+                        const toshow = document.getElementById(`${temp[0]},${temp[1]}`)
+                        toshow.classList.add("show")
+                        if(toshow.classList.contains("occupied")){
+                            break;
+                        }
+                    }
+                }
+            }
+        }
     }
     else if(elem.classList.contains("king")){
 
