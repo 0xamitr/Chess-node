@@ -25,7 +25,7 @@ io.on('connection', (socket) => {
     socket.on('code', (code)=>{
         socket.join(code)
         setTimeout(()=>{
-            if(io.sockets.adapter.rooms(code) && io.sockets.adapter.rooms.get(code).size == 1){
+            if(io.sockets.adapter.rooms.get(code) && io.sockets.adapter.rooms.get(code).size == 1){
                 console.log("gesdf")
                 socket.disconnect();
             }
