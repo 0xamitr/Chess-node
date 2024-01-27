@@ -15,13 +15,9 @@ app.use( express.static( __dirname + '/public' ));
 app.get('/', (req, res, next)=>{
     res.sendFile(path.join(__dirname, "index.html"))
 })
-setInterval(()=>{
-    console.log(io.sockets.adapter.rooms)
-    console.log(io.sockets.sockets.size)
-}, 5000)
 io.on('connection', (socket) => {
     console.log("user connected", socket.id)
-    socket.leave(socket.id);
+    // socket.leave(socket.id);
     socket.on('code', (code)=>{
         socket.join(code)
         setTimeout(()=>{
@@ -49,6 +45,12 @@ io.on('connection', (socket) => {
             socket.disconnect();
         }
     })
+    socket.on("move", (e) => {
+        let code = Array.from(socket.rooms)[1]
+        console.log(io.sockets.adapter.rooms)
+        console.log(socket.id)
+        socket.to(code).emit("go", e);
+    });
     socket.on('disconnect', () => {
         console.log('user disconnected', socket.id)
     });

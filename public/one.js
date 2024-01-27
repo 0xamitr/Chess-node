@@ -22,21 +22,24 @@ const createConnection = ()=>{
     input.style.display = "none"
     document.getElementById("code").textContent = code
     socket = io()
+    console.log("Socket:", socket);
     socket.emit('code', code)
     socket.on('connection_established', ()=>{
         alert("connection")
-        Game();
+        Game(socket, code);
     })
 }
 const submit = ()=>{
     socket = io()
-    socket.emit('submit', parseInt(input.value));
+    console.log(socket)
+    const val = parseInt(input.value)
+    socket.emit('submit', val);
     input.value = ""
     socket.on('roomfull', ()=>{
         alert("roomfull")
     })
     socket.on('connection_established', ()=>{
         alert("connection")
-        Game();
+        Game(socket, val);
     })
 }
