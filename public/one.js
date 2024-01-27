@@ -26,7 +26,7 @@ const createConnection = ()=>{
     socket.emit('code', code)
     socket.on('connection_established', ()=>{
         alert("connection")
-        Game(socket, code);
+        Game(socket, code, true);
     })
 }
 const submit = ()=>{
@@ -40,6 +40,6 @@ const submit = ()=>{
     })
     socket.on('connection_established', ()=>{
         alert("connection")
-        Game(socket, val);
+        Game(socket, val, false);
     })
 }

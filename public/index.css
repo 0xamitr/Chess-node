@@ -8,9 +8,12 @@ body{
 }
 
 .box{
-    height: 50px;
-    width: 50px;
+    height: 80px;
+    width: 80px;
     border: solid 2px black;
+    text-align: center;
+    line-height: 80px; /* Make the line height equal to the height of the square */
+    font-size: 60px;
 }
 
 .show{
