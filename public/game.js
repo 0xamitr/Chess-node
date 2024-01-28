@@ -144,6 +144,9 @@ function Game(socket, code, turn) {
             alert("check")
             console.log(checkCheck)
             globalcheck = true
+            if(checkCheckmate() == true){
+                timerinterval = 0
+            }
         }
     })
 }
@@ -164,6 +167,7 @@ function listener(elem, socket) {
                 possibleMoves(elem, globalcheck)
             }
             if (move && elem.classList.contains("show")) {
+                globalcheck = false
                 stop()
                 if (event.target.classList.contains("enemy")) {
                     event.target.classList.remove("enemy")
@@ -192,7 +196,8 @@ function listener(elem, socket) {
     })
 }
 
-function possibleMoves(elem, globalcheck) {
+function possibleMoves(elem, globalcheck, ok=0) {
+    let find = 0
     removeShow();
     const pos = (elem.id).split(",");
     pos[0] = parseInt(pos[0])
@@ -222,6 +227,7 @@ function possibleMoves(elem, globalcheck) {
                             if(compareArr(`${temp[0]},${temp[1]}`, k[t]) == true){
                                 toshow = document.getElementById(`${temp[0]},${temp[1]}`);
                                 toshow.classList.add("show");
+                                find++
                             }
 
                         }
@@ -260,6 +266,7 @@ function possibleMoves(elem, globalcheck) {
                             if(compareArr(`${temp[0]},${temp[1]}`, k[t]) == true){
                                 toshow = document.getElementById(`${temp[0]},${temp[1]}`);
                                 toshow.classList.add("show")
+                                find++
                             }
 
                         }
@@ -296,6 +303,7 @@ function possibleMoves(elem, globalcheck) {
                                 if(compareArr(`${temp[0]},${temp[1]}`, k[t]) == true){
                                     toshow = document.getElementById(`${temp[0]},${temp[1]}`);
                                     toshow.classList.add("show")
+                                    find++
                                 }
                             }
                         }
@@ -321,6 +329,7 @@ function possibleMoves(elem, globalcheck) {
                         console.log("Faf")
                         toshow = document.getElementById(`${temp[0]},${temp[1]}`);
                         toshow.classList.add("show")
+                        find++
                     }
                 }
             }
@@ -336,6 +345,7 @@ function possibleMoves(elem, globalcheck) {
                     for(let t = 0; t < k.length; t++){
                         if(compareArr(idl, k[t]) == true){
                             left.classList.add("show")
+                            find++
                         }
 
                     }
@@ -349,6 +359,7 @@ function possibleMoves(elem, globalcheck) {
                     for(let t = 0; t < k.length; t++){
                         if(compareArr(idr, k[t]) == true){
                             right.classList.add("show")
+                            find++
                         }
                     }
                 }
@@ -364,6 +375,8 @@ function possibleMoves(elem, globalcheck) {
                         for(let t = 0; t < k.length; t++){
                             if(compareArr(`${temp[0]},${temp[1]}`, k[t]) == true){
                                 toshow = document.getElementById(`${temp[0]},${temp[1]}`);
+                                toshow.classList.add("show")
+                                find++
                             }
                         }
                     }
@@ -398,6 +411,7 @@ function possibleMoves(elem, globalcheck) {
                                 if(compareArr(`${temp[0]},${temp[1]}`, k[t]) == true){
                                     toshow = document.getElementById(`${temp[0]},${temp[1]}`);
                                     toshow.classList.add("show")
+                                    find++
                                 }
                             }
                         }
@@ -415,19 +429,22 @@ function possibleMoves(elem, globalcheck) {
                 if ((temp[0] < 0 || temp[0] > 7 || temp[1] < 0 || temp[1] > 7)) {
                     continue;
                 }
-                if(globalcheck == true){
-                    if(document.getElementById(`${temp[0]},${temp[1]}`).hasAttribute("position")){
-                        continue
-                    }
+                if(document.getElementById(`${temp[0]},${temp[1]}`).hasAttribute("position")){
+                    continue
                 }
                 let toshow = document.getElementById(`${temp[0]},${temp[1]}`)
                 if (toshow.classList.contains("occupied")) {
                     continue;
                 }
                 toshow.classList.add("show")
+                find++
             }
         }
     }
+    if(ok == 1){
+        return find
+    }
+    return 0
 }
 
 function modifyPosition(pos) {
@@ -446,7 +463,8 @@ function start(){
     int = setInterval(()=>{
         timerinterval--;
         timer.textContent = format(timerinterval);
-        if(timerinterval == 0){
+        if(timerinterval < 0){
+            globalturn = false
             clearInterval(int)
         }
     }, 1000)
@@ -465,7 +483,7 @@ function format(seconds) {
 }
 
 function check(){
-     k = []
+    k = []
     const a = document.querySelectorAll("[position='threatning']");
     Array.from(a).forEach((elem)=>{
         elem.removeAttribute("position")
@@ -488,10 +506,10 @@ function check(){
                             continue;
                         }
                         const toshow = document.getElementById(`${temp[0]},${temp[1]}`);
+                        toshow.setAttribute('position', 'threatning');
                         if (toshow.classList.contains("enemy")) {
                             break;
                         }
-                        toshow.setAttribute('position', 'threatning');
                         if (toshow.classList.contains("occupied")) {
                             if(toshow.classList.contains("king")){
                                 let p = temp[0] - a[i];
@@ -519,10 +537,10 @@ function check(){
                             break;
                         }
                         const toshow = document.getElementById(`${temp[0]},${temp[1]}`)
+                        toshow.setAttribute('position', 'threatning');
                         if (toshow.classList.contains("enemy")) {
                             break;
                         }
-                        toshow.setAttribute('position', 'threatning');
                         if (toshow.classList.contains("occupied")) {
                             if(toshow.classList.contains("king")){
                                 let p = temp[0]
@@ -553,10 +571,10 @@ function check(){
                                 break;
                             }
                             const toshow = document.getElementById(`${temp[0]},${temp[1]}`)
+                            toshow.setAttribute('position', 'threatning');
                             if (toshow.classList.contains("enemy")) {
                                 break;
                             }
-                            toshow.setAttribute('position', 'threatning');
                             if (toshow.classList.contains("occupied")) {
                                 if(toshow.classList.contains("king")){
                                     let p = temp[0]
@@ -589,7 +607,6 @@ function check(){
                     }
                     left.setAttribute('position', 'threatning');
                 }
-
                 if(right && !right.classList.contains("occupied")){
                     if(right.classList.contains("king")){
                         k.push(idr)
@@ -691,5 +708,18 @@ function compareArr(arr1, arr2){
         }
     }
     return true
+}
+
+function checkCheckmate() {
+    const pieces = document.querySelectorAll('.occupied');
+    let find = 0
+    for (let i = 0; i < pieces.length; i++) {
+        const piece = pieces[i];
+        find += possibleMoves(piece, true, 1)
+    }
+    if(find == 0){
+        return true
+    }
+    return false
 }
 export default Game
