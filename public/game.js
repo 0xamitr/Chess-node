@@ -12,8 +12,8 @@ function Game(socket, code, turn) {
     if(globalturn){
         start()
     }
-    document.getElementById('one').style.display = "none"
     const two = document.getElementById('two')
+    two.innerHTML = ""
     for (let i = 0; i < 8; i++) {
         const row = document.createElement('div')
         for (let j = 0; j < 8; j++) {
@@ -517,6 +517,7 @@ function start(){
         if(timerinterval < 0){
             globalturn = false
             clearInterval(int)
+            gameOver()
         }
     }, 1000)
 }
@@ -820,6 +821,8 @@ function doit(a, b, i, j){
             break
         }
     }
-
+}
+function gameOver(){
+    
 }
 export default Game
