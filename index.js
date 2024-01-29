@@ -25,7 +25,7 @@ io.on('connection', (socket) => {
                 console.log("gesdf")
                 socket.disconnect();
             }
-        }, 10 * 1000)
+        }, 30 * 1000)
     })
     socket.on('submit', (submit)=>{
         let room = (io.sockets.adapter.rooms.get(submit))
