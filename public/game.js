@@ -49,7 +49,8 @@ function Game(socket, code, turn) {
                         boxes.textContent = String.fromCharCode(9814)
                     else
                         boxes.textContent = String.fromCharCode(9820)  
-                    boxes.classList.add("erook")              }
+                    boxes.classList.add("erook")              
+                }
                 else if (j == 3) {
                     if(!globalturn)
                         boxes.textContent = String.fromCharCode(9813)
@@ -220,7 +221,14 @@ function possibleMoves(elem, globalcheck, ok=0) {
                         if (toshow.classList.contains("occupied")) {
                             continue;
                         }
-                        toshow.classList.add("show");
+                        if(!elem.hasAttribute("cant-move")){
+                            toshow.classList.add("show");
+                        }
+                        else if(elem.hasAttribute("cant-move")){
+                            if(toshow.hasAttribute("set-check")){
+                                doit(temp[0], temp[1], i, j)
+                            }
+                        }
                     }
                     else{
                         for(let t = 0; t < k.length; t++){
@@ -256,26 +264,36 @@ function possibleMoves(elem, globalcheck, ok=0) {
                         if (toshow.classList.contains("occupied")) {
                             break;
                         }
-                        toshow.classList.add("show")
+                        if(!elem.hasAttribute("cant-move")){
+                            toshow.classList.add("show");
+                        }
+                        else if(elem.hasAttribute("cant-move")){
+                            if(toshow.hasAttribute("set-check")){
+                                doit(temp[0], temp[1], i, j)
+                            }
+                        }
                         if (toshow.classList.contains("enemy")) {
                             break;
                         }
                     }
                     else{
-                        for(let t = 0; t < k.length; t++){
-                            if(compareArr(`${temp[0]},${temp[1]}`, k[t]) == true){
-                                toshow = document.getElementById(`${temp[0]},${temp[1]}`);
-                                toshow.classList.add("show")
-                                find++
+                        toshow = document.getElementById(`${temp[0]},${temp[1]}`);
+                            if(toshow.classList.contains("occupied")){
+                                break
                             }
-
-                        }
+                            for(let t = 0; t < k.length; t++){
+                                if(compareArr(`${temp[0]},${temp[1]}`, k[t]) == true){
+                                    toshow.classList.add("show")
+                                    find++
+                                }
+                            }
                     }
                 }
             }
         }
     }
     else if (elem.classList.contains("bishop")) {
+        let lock = false
         for (let i = -1; i < 2; i++) {
             for (let j = -1; j < 2; j++) {
                 if (Math.abs(i) == Math.abs(j) && i != 0) {
@@ -293,15 +311,25 @@ function possibleMoves(elem, globalcheck, ok=0) {
                             if (toshow.classList.contains("occupied")) {
                                 break;
                             }
-                            toshow.classList.add("show")
+                            if(!elem.hasAttribute("cant-move")){
+                                toshow.classList.add("show");
+                            }
+                            else if(elem.hasAttribute("cant-move")){
+                                if(toshow.hasAttribute("set-check")){
+                                    doit(temp[0], temp[1], i, j)
+                                }
+                            }
                             if (toshow.classList.contains("enemy")) {
                                 break;
                             }
                         }
                         else{
+                            toshow = document.getElementById(`${temp[0]},${temp[1]}`);
+                            if(toshow.classList.contains("occupied")){
+                                break
+                            }
                             for(let t = 0; t < k.length; t++){
                                 if(compareArr(`${temp[0]},${temp[1]}`, k[t]) == true){
-                                    toshow = document.getElementById(`${temp[0]},${temp[1]}`);
                                     toshow.classList.add("show")
                                     find++
                                 }
@@ -320,7 +348,9 @@ function possibleMoves(elem, globalcheck, ok=0) {
             if(!globalcheck){
                 toshow = document.getElementById(`${temp[0]},${temp[1]}`);
                 if (!toshow.classList.contains("occupied") && !toshow.classList.contains("enemy")) {
-                    toshow.classList.add("show")
+                    if(!elem.hasAttribute("cant-move")){
+                        toshow.classList.add("show");
+                    }
                 }
             }
             else{
@@ -339,7 +369,12 @@ function possibleMoves(elem, globalcheck, ok=0) {
             let right = document.getElementById(idr)
             if(left && left.classList.contains("enemy")){
                 if(!globalcheck){
-                    left.classList.add("show")
+                    if(elem.hasAttribute("cant-move")){
+                        if(left.hasAttribute("set-check"))
+                            left.classList.add("show")
+                    }
+                    else
+                        left.classList.add("show")    
                 }
                 else{
                     for(let t = 0; t < k.length; t++){
@@ -353,7 +388,12 @@ function possibleMoves(elem, globalcheck, ok=0) {
             }
             if(right && right.classList.contains("enemy")){
                 if(!globalcheck){
-                    right.classList.add("show")
+                    if(elem.hasAttribute("cant-move")){
+                        if(right.hasAttribute("set-check"))
+                            right.classList.add("show")
+                    }
+                    else
+                        right.classList.add("show")   
                 }
                 else{
                     for(let t = 0; t < k.length; t++){
@@ -369,7 +409,8 @@ function possibleMoves(elem, globalcheck, ok=0) {
                 const toshow = document.getElementById(`${temp[0]},${temp[1]}`)
                 if(!globalcheck){
                     if (!toshow.classList.contains("occupied") && !toshow.classList.contains("enemy")) {
-                        toshow.classList.add("show")
+                        if(!elem.hasAttribute("cant-move"))
+                            toshow.classList.add("show")
                     }
                     else{
                         for(let t = 0; t < k.length; t++){
@@ -401,15 +442,25 @@ function possibleMoves(elem, globalcheck, ok=0) {
                             if (toshow.classList.contains("occupied")) {
                                 break;
                             }
-                            toshow.classList.add("show")
+                            if(!elem.hasAttribute("cant-move")){
+                                toshow.classList.add("show");
+                            }
+                            else if(elem.hasAttribute("cant-move")){
+                                if(toshow.hasAttribute("set-check")){
+                                    doit(temp[0], temp[1], i, j)
+                                }
+                            }
                             if (toshow.classList.contains("enemy")) {
                                 break;
                             }
                         }
                         else{
+                            toshow = document.getElementById(`${temp[0]},${temp[1]}`);
+                            if(toshow.classList.contains("occupied")){
+                                break
+                            }
                             for(let t = 0; t < k.length; t++){
                                 if(compareArr(`${temp[0]},${temp[1]}`, k[t]) == true){
-                                    toshow = document.getElementById(`${temp[0]},${temp[1]}`);
                                     toshow.classList.add("show")
                                     find++
                                 }
@@ -484,9 +535,17 @@ function format(seconds) {
 
 function check(){
     k = []
-    const a = document.querySelectorAll("[position='threatning']");
+    let a = document.querySelectorAll("[position='threatning']");
     Array.from(a).forEach((elem)=>{
         elem.removeAttribute("position")
+    })
+    a = document.querySelectorAll("[cant-move='true']");
+    Array.from(a).forEach((elem)=>{
+        elem.removeAttribute("cant-move")
+    })
+    a = document.querySelectorAll("[set-check='true']");
+    Array.from(a).forEach((elem)=>{
+        elem.removeAttribute("set-check")
     })
     const list = document.querySelectorAll(".enemy")
     Array.from(list).forEach((elem)=>{
@@ -542,6 +601,12 @@ function check(){
                             break;
                         }
                         if (toshow.classList.contains("occupied")) {
+                            console.log(lookforKing(temp[0], temp[1], i, j))
+                            console.log(temp[0], temp[1], i, j)
+                            if(lookforKing(temp[0], temp[1], i, j) == true){
+                                toshow.setAttribute('cant-move', 'true')
+                                elem.setAttribute('set-check', 'true')
+                            }
                             if(toshow.classList.contains("king")){
                                 let p = temp[0]
                                 let q = temp[1]
@@ -573,8 +638,10 @@ function check(){
                             const toshow = document.getElementById(`${temp[0]},${temp[1]}`)
                             toshow.setAttribute('position', 'threatning');
                             if (toshow.classList.contains("enemy")) {
-                                break;
-                            }
+                                if(lookforKing(temp[0], temp[1], i, j) == true){
+                                    toshow.setAttribute('cant-move', 'true')
+                                }
+                                break;                            }
                             if (toshow.classList.contains("occupied")) {
                                 if(toshow.classList.contains("king")){
                                     let p = temp[0]
@@ -628,8 +695,10 @@ function check(){
                             }
                             const toshow = document.getElementById(`${temp[0]},${temp[1]}`)
                             if (toshow.classList.contains("enemy")) {
-                                break;
-                            }
+                                if(lookforKing(temp[0], temp[1], i, j) == true){
+                                    toshow.setAttribute('cant-move', 'true')
+                                }
+                                break;                            }
                             toshow.setAttribute('position', 'threatning');
                             if (toshow.classList.contains("occupied")) {
                                 if(toshow.classList.contains("king")){
@@ -721,5 +790,36 @@ function checkCheckmate() {
         return true
     }
     return false
+}
+function lookforKing(a, b, i, j){
+    while(true){
+        a = a + i
+        b = b + j
+        if(a < 0 || a > 7 || b < 0 || b > 7){
+            return false
+        }
+        const toshow = document.getElementById(`${a},${b}`)
+        if(toshow.classList.contains("king")){
+            return true
+        }
+        else if(toshow.classList.contains("enemy")){
+            return false
+        }
+    }
+}
+function doit(a, b, i, j){
+    while(true){
+        const toshow = document.getElementById(`${a},${b}`)
+        if(toshow.hasAttribute("cant-move")){
+            break
+        }
+        toshow.classList.add("show")
+        a = a - i
+        b = b - j
+        if(a < 0 || a > 7 || b < 0 || b > 7){
+            break
+        }
+    }
+
 }
 export default Game
