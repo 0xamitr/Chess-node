@@ -10,7 +10,7 @@ function Game(socket, code, turn) {
     globalturn = turn
     timer.textContent = format(timerinterval)
     if(globalturn){
-        start()
+        start(socket)
     }
     const two = document.getElementById('two')
     two.innerHTML = ""
@@ -119,8 +119,14 @@ function Game(socket, code, turn) {
         two.append(row)
     }
     eventlistener(socket, code)
+    socket.on('over', ()=>{
+        document.getElementById("gameoverheading").textContent = "YOU WIN"
+        document.getElementById("gameover").style.display = "block"
+        socket.disconnect()
+        document.getElementById("container").style.filter = "blur(5px)"
+    })
     socket.on('go', (e) => {
-        start()
+        start(socket)
         globalturn = true
         console.log(e)
         const id = "" + e.initial[0] + "," + e.initial[1]
@@ -146,6 +152,7 @@ function Game(socket, code, turn) {
             console.log(checkCheck)
             globalcheck = true
             if(checkCheckmate() == true){
+                alert("checkmate")
                 timerinterval = 0
             }
         }
@@ -510,14 +517,14 @@ function removeShow() {
     })
 }
 
-function start(){
+function start(socket){
     int = setInterval(()=>{
         timerinterval--;
         timer.textContent = format(timerinterval);
         if(timerinterval < 0){
             globalturn = false
             clearInterval(int)
-            gameOver()
+            gameOver(socket)
         }
     }, 1000)
 }
@@ -792,6 +799,7 @@ function checkCheckmate() {
     }
     return false
 }
+
 function lookforKing(a, b, i, j){
     while(true){
         a = a + i
@@ -808,6 +816,7 @@ function lookforKing(a, b, i, j){
         }
     }
 }
+
 function doit(a, b, i, j){
     while(true){
         const toshow = document.getElementById(`${a},${b}`)
@@ -822,7 +831,12 @@ function doit(a, b, i, j){
         }
     }
 }
-function gameOver(){
+
+function gameOver(socket){
+    document.getElementById("gameoverheading").textContent = "YOU LOSE"
+    document.getElementById("gameover").style.display = "block"
+    socket.emit("gameover")
+    document.getElementById("container").style.filter = "blur(5px)"
     
 }
 export default Game
