@@ -10,7 +10,23 @@ for (let i = 0; i < 8; i++) {
     const row = document.createElement('div')
     for (let j = 0; j < 8; j++) {
         const boxes = document.createElement('div')
-        boxes.className = "box"
+        boxes.classList.add("box")
+        if(i%2 == 0){
+            if(j%2 == 0){
+                boxes.classList.add("light");
+            }
+            else{
+                boxes.classList.add("dark")
+            }
+        }
+        else{
+            if(j%2 != 0){
+                boxes.classList.add("light");
+            }
+            else{
+                boxes.classList.add("dark")
+            }
+        }
         if (i == 1) {
             boxes.classList.add("enemy")
             if(!globalturn)

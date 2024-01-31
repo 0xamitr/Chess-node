@@ -82,3 +82,21 @@ button:hover{
     z-index: -1;
 }
 
+.eking div[set-check]{
+    background-color: aqua;
+}
+
+.light{
+    background-color: rgb(227,193,111);
+}
+
+.dark{
+    background-color: rgb(184,139,74);
+}
+
+.dark.show{
+    background-color: green;
+}
+.light.show{
+    background-color: green;
+}

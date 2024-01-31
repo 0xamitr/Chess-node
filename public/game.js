@@ -18,7 +18,23 @@ function Game(socket, code, turn) {
         const row = document.createElement('div')
         for (let j = 0; j < 8; j++) {
             const boxes = document.createElement('div')
-            boxes.className = "box"
+            boxes.classList.add("box")
+            if(i%2 == 0){
+                if(j%2 == 0){
+                    boxes.classList.add("light");
+                }
+                else{
+                    boxes.classList.add("dark")
+                }
+            }
+            else{
+                if(j%2 != 0){
+                    boxes.classList.add("light");
+                }
+                else{
+                    boxes.classList.add("dark")
+                }
+            }
             if (i == 1) {
                 boxes.classList.add("enemy")
                 if(!globalturn)
@@ -136,12 +152,18 @@ function Game(socket, code, turn) {
         final.textContent = select.textContent
         select.textContent = ""
         Array.from(final.classList).forEach(function (className) {
-            if (className != "box") {
+            if(className == "box" || className == "dark" || className == "light"){
+
+            }
+            else{
                 final.classList.remove(className)
             }
-        });
+        })
         Array.from(select.classList).forEach(function (className) {
-            if (className != "box") {
+            if(className == "box" || className == "dark" || className == "light"){
+
+            }
+            else{
                 final.classList.add(className)
                 select.classList.remove(className)
             }
@@ -193,7 +215,10 @@ function listener(elem, socket) {
                 selected.textContent = "";
                 console.log(selected.classList)
                 Array.from(selected.classList).forEach(function (className) {
-                    if (className != "box") {
+                    if(className == "box" || className == "dark" || className == "light"){
+                        console.log("fs")
+                    }
+                    else{
                         event.target.classList.add(className)
                         selected.classList.remove(className)
                     }
