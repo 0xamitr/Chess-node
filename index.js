@@ -2,22 +2,34 @@ import express from 'express'
 import { Server } from 'socket.io'
 import { createServer } from 'http'
 import path from 'path'
-import { SocketAddress } from 'net';
-import { rootCertificates } from 'tls';
+import {mongoose} from 'mongoose'
+import User from './public/Schema/schema.js'
 
+const MONGO_URL = process.env.MONGODB_URL
 const __dirname = path.resolve();
 const app = express();
 const PORT = process.env.PORT || 3000
+
 const server = createServer(app);
 const io = new Server(server);
+
+async function main(){
+    await mongoose.connect(MONGO_URL)
+}
+main().catch((err)=>{
+    console.log(err)
+})
+
 app.use( express.static( __dirname + '/public' ));
 
 app.get('/', (req, res, next)=>{
     res.sendFile(path.join(__dirname, "index.html"))
 })
+
 setInterval(()=>{
     console.log(io.sockets.adapter.rooms)
 }, 5000)
+
 io.on('connection', (socket) => {
     console.log("user connected", socket.id)
     socket.on('code', (code)=>{
@@ -62,6 +74,17 @@ io.on('connection', (socket) => {
         console.log('user disconnected', socket.id)
     });
 })
+
+passport.use(new LocalStrategy(
+    function(username, password, done) {
+      User.findOne({ username: username }, function (err, user) {
+        if (err) { return done(err); }
+        if (!user) { return done(null, false); }
+        if (!user.verifyPassword(password)) { return done(null, false); }
+        return done(null, user);
+        });
+    }
+));
 
 server.listen(PORT, "0.0.0.0", ()=>{
     console.log("running")
