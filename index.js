@@ -4,6 +4,8 @@ import { createServer } from 'http'
 import path from 'path'
 import {mongoose} from 'mongoose'
 import User from './public/Schema/schema.js'
+import passport from 'passport'
+import LocalStrategy from 'passport-local'
 
 const MONGO_URL = process.env.MONGODB_URL
 const __dirname = path.resolve();
@@ -19,12 +21,28 @@ async function main(){
 main().catch((err)=>{
     console.log(err)
 })
+app.use(express.json());
 
-app.use( express.static( __dirname + '/public' ));
+app.use(express.static(path.join(__dirname, 'public')));
 
 app.get('/', (req, res, next)=>{
     res.sendFile(path.join(__dirname, "index.html"))
 })
+
+app.post('/login', 
+    passport.authenticate('local', { failureRedirect: '/login' }),
+    function(req, res) {
+        res.redirect('/');
+});
+
+app.get('/signup', (req, res)=>{
+    res.sendFile(path.join(__dirname, "/public/SignUp/signup.html"))
+})
+
+app.post('/signup', (req, res)=>{
+    console.log(req.body.username);
+    console.log(req.body.password);
+});
 
 setInterval(()=>{
     console.log(io.sockets.adapter.rooms)
@@ -77,7 +95,7 @@ io.on('connection', (socket) => {
 
 passport.use(new LocalStrategy(
     function(username, password, done) {
-      User.findOne({ username: username }, function (err, user) {
+        User.findOne({ username: username }, function (err, user) {
         if (err) { return done(err); }
         if (!user) { return done(null, false); }
         if (!user.verifyPassword(password)) { return done(null, false); }
