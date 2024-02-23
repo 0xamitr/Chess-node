@@ -1,3 +1,4 @@
+import { text } from "express";
 import { Schema, mongoose } from "mongoose";
 
 const user = {
@@ -8,6 +9,7 @@ const user = {
         default: Date.now()
     },
     elo: Number,
+    profile: String,
 }
 
 const userSchema = new Schema(user)

@@ -9,35 +9,35 @@ let k = []
 function Game(socket, code, turn) {
     globalturn = turn
     timer.textContent = format(timerinterval)
-    if(globalturn){
+    if (globalturn)
         start(socket)
-    }
     const two = document.getElementById('two')
     two.innerHTML = ""
     for (let i = 0; i < 8; i++) {
         const row = document.createElement('div')
-        for (let j = 0; j < 8; j++) {
+        let j = globalturn ? 0: 7;
+        while((globalturn && (j < 8)) || (!globalturn && (j > -1))){
             const boxes = document.createElement('div')
             boxes.classList.add("box")
-            if(i%2 == 0){
-                if(j%2 == 0){
+            if (i % 2 == 0) {
+                if (j % 2 == 0) {
                     boxes.classList.add("light");
                 }
-                else{
+                else {
                     boxes.classList.add("dark")
                 }
             }
-            else{
-                if(j%2 != 0){
+            else {
+                if (j % 2 != 0) {
                     boxes.classList.add("light");
                 }
-                else{
+                else {
                     boxes.classList.add("dark")
                 }
             }
             if (i == 1) {
                 boxes.classList.add("enemy")
-                if(!globalturn)
+                if (!globalturn)
                     boxes.textContent = String.fromCharCode(9817)
                 else
                     boxes.textContent = String.fromCharCode(9823)
@@ -46,14 +46,14 @@ function Game(socket, code, turn) {
             else if (i == 0) {
                 boxes.classList.add("enemy")
                 if (j == 6 || j == 1) {
-                    if(!globalturn)
+                    if (!globalturn)
                         boxes.textContent = String.fromCharCode(9816)
                     else
                         boxes.textContent = String.fromCharCode(9822)
                     boxes.classList.add("eknight")
                 }
                 else if (j == 5 || j == 2) {
-                    if(!globalturn)
+                    if (!globalturn)
                         boxes.textContent = String.fromCharCode(9815)
                     else
                         boxes.textContent = String.fromCharCode(9821)
@@ -61,21 +61,21 @@ function Game(socket, code, turn) {
 
                 }
                 else if (j == 7 || j == 0) {
-                    if(!globalturn)
+                    if (!globalturn)
                         boxes.textContent = String.fromCharCode(9814)
                     else
-                        boxes.textContent = String.fromCharCode(9820)  
-                    boxes.classList.add("erook")              
+                        boxes.textContent = String.fromCharCode(9820)
+                    boxes.classList.add("erook")
                 }
                 else if (j == 3) {
-                    if(!globalturn)
+                    if (!globalturn)
                         boxes.textContent = String.fromCharCode(9813)
                     else
                         boxes.textContent = String.fromCharCode(9819)
-                        boxes.classList.add("equeen")
+                    boxes.classList.add("equeen")
                 }
                 else if (j == 4) {
-                    if(!globalturn)
+                    if (!globalturn)
                         boxes.textContent = String.fromCharCode(9812)
                     else
                         boxes.textContent = String.fromCharCode(9818)
@@ -84,7 +84,7 @@ function Game(socket, code, turn) {
             }
             else if (i == 6) {
                 boxes.classList.add("occupied")
-                if(globalturn)
+                if (globalturn)
                     boxes.textContent = String.fromCharCode(9817)
                 else
                     boxes.textContent = String.fromCharCode(9823)
@@ -92,50 +92,56 @@ function Game(socket, code, turn) {
             }
             else if (i == 7) {
                 boxes.classList.add("occupied")
-                if (j == 6 || j == 1) { 
-                    if(globalturn)
+                if (j == 6 || j == 1) {
+                    if (globalturn)
                         boxes.textContent = String.fromCharCode(9816)
                     else
                         boxes.textContent = String.fromCharCode(9822)
                     boxes.classList.add("knight")
                 }
                 else if (j == 5 || j == 2) {
-                    if(globalturn)
+                    if (globalturn)
                         boxes.textContent = String.fromCharCode(9815)
                     else
                         boxes.textContent = String.fromCharCode(9821)
                     boxes.classList.add("bishop")
                 }
                 if (j == 7 || j == 0) {
-                    if(globalturn)
+                    if (globalturn)
                         boxes.textContent = String.fromCharCode(9814)
                     else
                         boxes.textContent = String.fromCharCode(9820)
                     boxes.classList.add("rook")
+                    boxes.classList.add("notmoved")
                 }
                 else if (j == 3) {
-                    if(globalturn)
+                    if (globalturn)
                         boxes.textContent = String.fromCharCode(9813)
                     else
                         boxes.textContent = String.fromCharCode(9819)
                     boxes.classList.add("queen")
                 }
                 else if (j == 4) {
-                    if(globalturn)
+                    if (globalturn)
                         boxes.textContent = String.fromCharCode(9812)
                     else
                         boxes.textContent = String.fromCharCode(9818)
                     boxes.classList.add("king")
+                    boxes.classList.add("notmoved")
                 }
             }
             boxes.id = `${i},${j}`
             row.append(boxes)
+            if(globalturn)
+                j++
+            else
+                j--
         }
         row.className = "row"
         two.append(row)
     }
     eventlistener(socket, code)
-    socket.on('over', ()=>{
+    socket.on('over', () => {
         document.getElementById("gameoverheading").textContent = "YOU WIN"
         document.getElementById("gameover").style.display = "block"
         socket.disconnect()
@@ -144,7 +150,6 @@ function Game(socket, code, turn) {
     socket.on('go', (e) => {
         start(socket)
         globalturn = true
-        console.log(e)
         const id = "" + e.initial[0] + "," + e.initial[1]
         const finalid = e.final[0] + "," + e.final[1]
         let select = document.getElementById(id)
@@ -152,28 +157,27 @@ function Game(socket, code, turn) {
         final.textContent = select.textContent
         select.textContent = ""
         Array.from(final.classList).forEach(function (className) {
-            if(className == "box" || className == "dark" || className == "light"){
+            if (className == "box" || className == "dark" || className == "light") {
 
             }
-            else{
+            else {
                 final.classList.remove(className)
             }
         })
         Array.from(select.classList).forEach(function (className) {
-            if(className == "box" || className == "dark" || className == "light"){
+            if (className == "box" || className == "dark" || className == "light") {
 
             }
-            else{
+            else {
                 final.classList.add(className)
                 select.classList.remove(className)
             }
         });
         const checkCheck = check()
-        if(checkCheck.length != 0){
+        if (checkCheck.length != 0) {
             alert("check")
-            console.log(checkCheck)
             globalcheck = true
-            if(checkCheckmate() == true){
+            if (checkCheckmate() == true) {
                 alert("checkmate")
                 timerinterval = 0
             }
@@ -209,16 +213,48 @@ function listener(elem, socket) {
                     initial: initial_pos,
                     final: final_pos
                 });
+                if (selected.textContent == String.fromCharCode(9814) || selected.textContent == String.fromCharCode(9812)) {
+                    if (selected.classList.contains("notmoved")) {
+                        selected.classList.remove("notmoved");
+                    }
+                }
+                if ((selected.textContent == String.fromCharCode(9812) || selected.textContent == String.fromCharCode(9818)) && (event.target.id == "7,6" || event.target.id == "7,4")) {
+                    let oldrook
+                    let newrook
+                    if (event.target.id == "7,6") {
+                        console.log("ok")
+                        oldrook = document.getElementById("7,7")
+                        newrook = document.getElementById("7,5")
+                        socket.emit("move", {
+                            initial: [0,7],
+                            final: [0,5]
+                        });
+                    }
+                    else if (event.target.id == "7,1") {
+                        oldrook = document.getElementById("7,0")
+                        newrook = document.getElementById("7,3")
+                    }
+                    oldrook.classList.remove("notmoved")
+                    Array.from(oldrook.classList).forEach(function (className) {
+                        if (className == "box" || className == "dark" || className == "light") {
+                        }
+                        else {
+                            newrook.classList.add(className)
+                            oldrook.classList.remove(className)
+                        }
+                    })
+                    newrook.textContent = oldrook.textContent
+                    oldrook.textContent = ""
+            
+                }
                 removeShow()
                 move = false
                 event.target.textContent = selected.textContent
                 selected.textContent = "";
-                console.log(selected.classList)
                 Array.from(selected.classList).forEach(function (className) {
-                    if(className == "box" || className == "dark" || className == "light"){
-                        console.log("fs")
+                    if (className == "box" || className == "dark" || className == "light") {
                     }
-                    else{
+                    else {
                         event.target.classList.add(className)
                         selected.classList.remove(className)
                     }
@@ -229,7 +265,7 @@ function listener(elem, socket) {
     })
 }
 
-function possibleMoves(elem, globalcheck, ok=0) {
+function possibleMoves(elem, globalcheck, ok = 0) {
     let find = 0
     removeShow();
     const pos = (elem.id).split(",");
@@ -248,23 +284,23 @@ function possibleMoves(elem, globalcheck, ok=0) {
                         continue;
                     }
                     let toshow
-                    if(!globalcheck){
+                    if (!globalcheck) {
                         toshow = document.getElementById(`${temp[0]},${temp[1]}`);
                         if (toshow.classList.contains("occupied")) {
                             continue;
                         }
-                        if(!elem.hasAttribute("cant-move")){
+                        if (!elem.hasAttribute("cant-move")) {
                             toshow.classList.add("show");
                         }
-                        else if(elem.hasAttribute("cant-move")){
-                            if(toshow.hasAttribute("set-check")){
+                        else if (elem.hasAttribute("cant-move")) {
+                            if (toshow.hasAttribute("set-check")) {
                                 doit(temp[0], temp[1], i, j)
                             }
                         }
                     }
-                    else{
-                        for(let t = 0; t < k.length; t++){
-                            if(compareArr(`${temp[0]},${temp[1]}`, k[t]) == true){
+                    else {
+                        for (let t = 0; t < k.length; t++) {
+                            if (compareArr(`${temp[0]},${temp[1]}`, k[t]) == true) {
                                 toshow = document.getElementById(`${temp[0]},${temp[1]}`);
                                 toshow.classList.add("show");
                                 find++
@@ -291,16 +327,16 @@ function possibleMoves(elem, globalcheck, ok=0) {
                         break;
                     }
                     let toshow
-                    if(!globalcheck){
+                    if (!globalcheck) {
                         toshow = document.getElementById(`${temp[0]},${temp[1]}`);
                         if (toshow.classList.contains("occupied")) {
                             break;
                         }
-                        if(!elem.hasAttribute("cant-move")){
+                        if (!elem.hasAttribute("cant-move")) {
                             toshow.classList.add("show");
                         }
-                        else if(elem.hasAttribute("cant-move")){
-                            if(toshow.hasAttribute("set-check")){
+                        else if (elem.hasAttribute("cant-move")) {
+                            if (toshow.hasAttribute("set-check")) {
                                 doit(temp[0], temp[1], i, j)
                             }
                         }
@@ -308,17 +344,17 @@ function possibleMoves(elem, globalcheck, ok=0) {
                             break;
                         }
                     }
-                    else{
+                    else {
                         toshow = document.getElementById(`${temp[0]},${temp[1]}`);
-                            if(toshow.classList.contains("occupied")){
-                                break
+                        if (toshow.classList.contains("occupied")) {
+                            break
+                        }
+                        for (let t = 0; t < k.length; t++) {
+                            if (compareArr(`${temp[0]},${temp[1]}`, k[t]) == true) {
+                                toshow.classList.add("show")
+                                find++
                             }
-                            for(let t = 0; t < k.length; t++){
-                                if(compareArr(`${temp[0]},${temp[1]}`, k[t]) == true){
-                                    toshow.classList.add("show")
-                                    find++
-                                }
-                            }
+                        }
                     }
                 }
             }
@@ -330,7 +366,6 @@ function possibleMoves(elem, globalcheck, ok=0) {
             for (let j = -1; j < 2; j++) {
                 if (Math.abs(i) == Math.abs(j) && i != 0) {
                     let temp = pos.slice();
-                    console.log(temp)
                     while (true) {
                         temp[0] = temp[0] + i;
                         temp[1] = temp[1] + j;
@@ -338,16 +373,16 @@ function possibleMoves(elem, globalcheck, ok=0) {
                             break;
                         }
                         let toshow
-                        if(!globalcheck){
+                        if (!globalcheck) {
                             toshow = document.getElementById(`${temp[0]},${temp[1]}`);
                             if (toshow.classList.contains("occupied")) {
                                 break;
                             }
-                            if(!elem.hasAttribute("cant-move")){
+                            if (!elem.hasAttribute("cant-move")) {
                                 toshow.classList.add("show");
                             }
-                            else if(elem.hasAttribute("cant-move")){
-                                if(toshow.hasAttribute("set-check")){
+                            else if (elem.hasAttribute("cant-move")) {
+                                if (toshow.hasAttribute("set-check")) {
                                     doit(temp[0], temp[1], i, j)
                                 }
                             }
@@ -355,13 +390,13 @@ function possibleMoves(elem, globalcheck, ok=0) {
                                 break;
                             }
                         }
-                        else{
+                        else {
                             toshow = document.getElementById(`${temp[0]},${temp[1]}`);
-                            if(toshow.classList.contains("occupied")){
+                            if (toshow.classList.contains("occupied")) {
                                 break
                             }
-                            for(let t = 0; t < k.length; t++){
-                                if(compareArr(`${temp[0]},${temp[1]}`, k[t]) == true){
+                            for (let t = 0; t < k.length; t++) {
+                                if (compareArr(`${temp[0]},${temp[1]}`, k[t]) == true) {
                                     toshow.classList.add("show")
                                     find++
                                 }
@@ -373,21 +408,25 @@ function possibleMoves(elem, globalcheck, ok=0) {
         }
     }
     else if (elem.classList.contains("pawn")) {
+        let neeraj = false
         let temp = pos.slice();
         if ((temp[0] > 0 || temp[0] <= 7 || temp[1] >= 0 || temp[1] <= 7)) {
             temp[0]--;
             let toshow
-            if(!globalcheck){
+            if (!globalcheck) {
                 toshow = document.getElementById(`${temp[0]},${temp[1]}`);
                 if (!toshow.classList.contains("occupied") && !toshow.classList.contains("enemy")) {
-                    if(!elem.hasAttribute("cant-move")){
+                    if (!elem.hasAttribute("cant-move")) {
                         toshow.classList.add("show");
                     }
                 }
+                else {
+                    neeraj = true
+                }
             }
-            else{
-                for(let t = 0; t < k.length; t++){
-                    if(compareArr(`${temp[0]},${temp[1]}`, k[t]) == true){
+            else {
+                for (let t = 0; t < k.length; t++) {
+                    if (compareArr(`${temp[0]},${temp[1]}`, k[t]) == true) {
                         console.log("Faf")
                         toshow = document.getElementById(`${temp[0]},${temp[1]}`);
                         toshow.classList.add("show")
@@ -395,58 +434,57 @@ function possibleMoves(elem, globalcheck, ok=0) {
                     }
                 }
             }
-            const idl = temp[0] + "," + (temp[1]-1)
-            const idr = temp[0] + "," + (temp[1]+1)
+            const idl = temp[0] + "," + (temp[1] - 1)
+            const idr = temp[0] + "," + (temp[1] + 1)
             let left = document.getElementById(idl)
             let right = document.getElementById(idr)
-            if(left && left.classList.contains("enemy")){
-                if(!globalcheck){
-                    if(elem.hasAttribute("cant-move")){
-                        if(left.hasAttribute("set-check"))
+            if (left && left.classList.contains("enemy")) {
+                if (!globalcheck) {
+                    if (elem.hasAttribute("cant-move")) {
+                        if (left.hasAttribute("set-check"))
                             left.classList.add("show")
                     }
                     else
-                        left.classList.add("show")    
+                        left.classList.add("show")
                 }
-                else{
-                    for(let t = 0; t < k.length; t++){
-                        if(compareArr(idl, k[t]) == true){
+                else {
+                    for (let t = 0; t < k.length; t++) {
+                        if (compareArr(idl, k[t]) == true) {
                             left.classList.add("show")
-                            find++
-                        }
-
-                    }
-                }
-            }
-            if(right && right.classList.contains("enemy")){
-                if(!globalcheck){
-                    if(elem.hasAttribute("cant-move")){
-                        if(right.hasAttribute("set-check"))
-                            right.classList.add("show")
-                    }
-                    else
-                        right.classList.add("show")   
-                }
-                else{
-                    for(let t = 0; t < k.length; t++){
-                        if(compareArr(idr, k[t]) == true){
-                            right.classList.add("show")
                             find++
                         }
                     }
                 }
             }
-            if (temp[0] == 5) {
+            if (right && right.classList.contains("enemy")) {
+                if (!globalcheck) {
+                    if (elem.hasAttribute("cant-move")) {
+                        if (right.hasAttribute("set-check"))
+                            right.classList.add("show")
+                    }
+                    else
+                        right.classList.add("show")
+                }
+                else {
+                    for (let t = 0; t < k.length; t++) {
+                        if (compareArr(idr, k[t]) == true) {
+                            right.classList.add("show")
+                            find++
+                        }
+                    }
+                }
+            }
+            if (!neeraj && temp[0] == 5) {
                 temp[0]--;
                 const toshow = document.getElementById(`${temp[0]},${temp[1]}`)
-                if(!globalcheck){
+                if (!globalcheck) {
                     if (!toshow.classList.contains("occupied") && !toshow.classList.contains("enemy")) {
-                        if(!elem.hasAttribute("cant-move"))
+                        if (!elem.hasAttribute("cant-move"))
                             toshow.classList.add("show")
                     }
-                    else{
-                        for(let t = 0; t < k.length; t++){
-                            if(compareArr(`${temp[0]},${temp[1]}`, k[t]) == true){
+                    else {
+                        for (let t = 0; t < k.length; t++) {
+                            if (compareArr(`${temp[0]},${temp[1]}`, k[t]) == true) {
                                 toshow = document.getElementById(`${temp[0]},${temp[1]}`);
                                 toshow.classList.add("show")
                                 find++
@@ -469,16 +507,16 @@ function possibleMoves(elem, globalcheck, ok=0) {
                             break;
                         }
                         let toshow
-                        if(!globalcheck){
+                        if (!globalcheck) {
                             toshow = document.getElementById(`${temp[0]},${temp[1]}`);
                             if (toshow.classList.contains("occupied")) {
                                 break;
                             }
-                            if(!elem.hasAttribute("cant-move")){
+                            if (!elem.hasAttribute("cant-move")) {
                                 toshow.classList.add("show");
                             }
-                            else if(elem.hasAttribute("cant-move")){
-                                if(toshow.hasAttribute("set-check")){
+                            else if (elem.hasAttribute("cant-move")) {
+                                if (toshow.hasAttribute("set-check")) {
                                     doit(temp[0], temp[1], i, j)
                                 }
                             }
@@ -486,13 +524,13 @@ function possibleMoves(elem, globalcheck, ok=0) {
                                 break;
                             }
                         }
-                        else{
+                        else {
                             toshow = document.getElementById(`${temp[0]},${temp[1]}`);
-                            if(toshow.classList.contains("occupied")){
+                            if (toshow.classList.contains("occupied")) {
                                 break
                             }
-                            for(let t = 0; t < k.length; t++){
-                                if(compareArr(`${temp[0]},${temp[1]}`, k[t]) == true){
+                            for (let t = 0; t < k.length; t++) {
+                                if (compareArr(`${temp[0]},${temp[1]}`, k[t]) == true) {
                                     toshow.classList.add("show")
                                     find++
                                 }
@@ -512,7 +550,7 @@ function possibleMoves(elem, globalcheck, ok=0) {
                 if ((temp[0] < 0 || temp[0] > 7 || temp[1] < 0 || temp[1] > 7)) {
                     continue;
                 }
-                if(document.getElementById(`${temp[0]},${temp[1]}`).hasAttribute("position")){
+                if (document.getElementById(`${temp[0]},${temp[1]}`).hasAttribute("position")) {
                     continue
                 }
                 let toshow = document.getElementById(`${temp[0]},${temp[1]}`)
@@ -523,8 +561,28 @@ function possibleMoves(elem, globalcheck, ok=0) {
                 find++
             }
         }
+        if (elem.classList.contains("notmoved")) {
+            const rooks = document.querySelectorAll(".rook")
+            Array.from(rooks).forEach((rook) => {
+                if (rook.classList.contains("notmoved")) {
+                    console.log(rook.id)
+                    if (rook.id == "7,7") {
+                        const first = document.getElementById("7,5")
+                        const second = document.getElementById("7,6")
+                        console.log(first)
+                        console.log(second)
+                        if (!first.classList.contains("occupied") && !second.classList.contains("occupied") && (first.getAttribute("position") != "threatning") && (second.getAttribute("position") != "threatning")) {
+                            second.classList.add("show")
+                        }
+                    }
+                    else if (rook.id == "7,0") {
+
+                    }
+                }
+            })
+        }
     }
-    if(ok == 1){
+    if (ok == 1) {
         return find
     }
     return 0
@@ -542,11 +600,11 @@ function removeShow() {
     })
 }
 
-function start(socket){
-    int = setInterval(()=>{
+function start(socket) {
+    int = setInterval(() => {
         timerinterval--;
         timer.textContent = format(timerinterval);
-        if(timerinterval < 0){
+        if (timerinterval < 0) {
             globalturn = false
             clearInterval(int)
             gameOver(socket)
@@ -554,7 +612,7 @@ function start(socket){
     }, 1000)
 }
 
-function stop(){
+function stop() {
     clearInterval(int)
 }
 
@@ -566,22 +624,22 @@ function format(seconds) {
     return minutes + ':' + remainingSeconds;
 }
 
-function check(){
+function check() {
     k = []
     let a = document.querySelectorAll("[position='threatning']");
-    Array.from(a).forEach((elem)=>{
+    Array.from(a).forEach((elem) => {
         elem.removeAttribute("position")
     })
     a = document.querySelectorAll("[cant-move='true']");
-    Array.from(a).forEach((elem)=>{
+    Array.from(a).forEach((elem) => {
         elem.removeAttribute("cant-move")
     })
     a = document.querySelectorAll("[set-check='true']");
-    Array.from(a).forEach((elem)=>{
+    Array.from(a).forEach((elem) => {
         elem.removeAttribute("set-check")
     })
     const list = document.querySelectorAll(".enemy")
-    Array.from(list).forEach((elem)=>{
+    Array.from(list).forEach((elem) => {
         const pos = (elem.id).split(",");
         pos[0] = parseInt(pos[0])
         pos[1] = parseInt(pos[1])
@@ -603,7 +661,7 @@ function check(){
                             break;
                         }
                         if (toshow.classList.contains("occupied")) {
-                            if(toshow.classList.contains("king")){
+                            if (toshow.classList.contains("king")) {
                                 let p = temp[0] - a[i];
                                 let q = temp[1] - a[j];
                                 k.push(`${p},${q}`)
@@ -636,14 +694,14 @@ function check(){
                         if (toshow.classList.contains("occupied")) {
                             console.log(lookforKing(temp[0], temp[1], i, j))
                             console.log(temp[0], temp[1], i, j)
-                            if(lookforKing(temp[0], temp[1], i, j) == true){
+                            if (lookforKing(temp[0], temp[1], i, j) == true) {
                                 toshow.setAttribute('cant-move', 'true')
                                 elem.setAttribute('set-check', 'true')
                             }
-                            if(toshow.classList.contains("king")){
+                            if (toshow.classList.contains("king")) {
                                 let p = temp[0]
                                 let q = temp[1]
-                                while(!document.getElementById(`${p},${q}`).classList.contains("enemy")){
+                                while (!document.getElementById(`${p},${q}`).classList.contains("enemy")) {
                                     p = p - i
                                     q = q - j
                                     k.push(`${p},${q}`)
@@ -671,15 +729,16 @@ function check(){
                             const toshow = document.getElementById(`${temp[0]},${temp[1]}`)
                             toshow.setAttribute('position', 'threatning');
                             if (toshow.classList.contains("enemy")) {
-                                if(lookforKing(temp[0], temp[1], i, j) == true){
+                                if (lookforKing(temp[0], temp[1], i, j) == true) {
                                     toshow.setAttribute('cant-move', 'true')
                                 }
-                                break;                            }
+                                break;
+                            }
                             if (toshow.classList.contains("occupied")) {
-                                if(toshow.classList.contains("king")){
+                                if (toshow.classList.contains("king")) {
                                     let p = temp[0]
                                     let q = temp[1]
-                                    while(document.getElementById(`${p},${q}`).classList.contains("occupied")){
+                                    while (document.getElementById(`${p},${q}`).classList.contains("occupied")) {
                                         k.push(`${p},${q}`)
                                         p = p - i
                                         q = q - j
@@ -697,18 +756,18 @@ function check(){
             let temp = pos.slice();
             if ((temp[0] > 0 || temp[0] <= 7 || temp[1] >= 0 || temp[1] <= 7)) {
                 temp[0]++;
-                const idl = temp[0] + "," + (temp[1]-1)
-                const idr = temp[0] + "," + (temp[1]+1)
+                const idl = temp[0] + "," + (temp[1] - 1)
+                const idr = temp[0] + "," + (temp[1] + 1)
                 const left = document.getElementById(idl)
                 const right = document.getElementById(idr)
-                if(left && !left.classList.contains("occupied")){
-                    if(left.classList.contains("king")){
+                if (left && !left.classList.contains("occupied")) {
+                    if (left.classList.contains("king")) {
                         k.push(idl)
                     }
                     left.setAttribute('position', 'threatning');
                 }
-                if(right && !right.classList.contains("occupied")){
-                    if(right.classList.contains("king")){
+                if (right && !right.classList.contains("occupied")) {
+                    if (right.classList.contains("king")) {
                         k.push(idr)
                     }
                     right.setAttribute('position', 'threatning');
@@ -728,16 +787,17 @@ function check(){
                             }
                             const toshow = document.getElementById(`${temp[0]},${temp[1]}`)
                             if (toshow.classList.contains("enemy")) {
-                                if(lookforKing(temp[0], temp[1], i, j) == true){
+                                if (lookforKing(temp[0], temp[1], i, j) == true) {
                                     toshow.setAttribute('cant-move', 'true')
                                 }
-                                break;                            }
+                                break;
+                            }
                             toshow.setAttribute('position', 'threatning');
                             if (toshow.classList.contains("occupied")) {
-                                if(toshow.classList.contains("king")){
+                                if (toshow.classList.contains("king")) {
                                     let p = temp[0]
                                     let q = temp[1]
-                                    while(document.getElementById(`${p},${q}`).classList.contains("occupied")){
+                                    while (document.getElementById(`${p},${q}`).classList.contains("occupied")) {
                                         k.push(`${p},${q}`)
                                         p = p - i
                                         q = q - j
@@ -775,36 +835,36 @@ function check(){
     return k;
 }
 
-function removeEnemy(elem){
-    if(elem.classList.contains("eking")){
+function removeEnemy(elem) {
+    if (elem.classList.contains("eking")) {
         elem.classList.remove("eking")
     }
-    else if(elem.classList.contains("equeen")){
+    else if (elem.classList.contains("equeen")) {
         elem.classList.remove("equeen")
     }
-    else if(elem.classList.contains("eknight")){
+    else if (elem.classList.contains("eknight")) {
         elem.classList.remove("eknight")
     }
-    else if(elem.classList.contains("ebishop")){
+    else if (elem.classList.contains("ebishop")) {
         elem.classList.remove("ebishop")
     }
-    else if(elem.classList.contains("epawn")){
+    else if (elem.classList.contains("epawn")) {
         elem.classList.remove("epawn")
     }
-    else if(elem.classList.contains("erook")){
+    else if (elem.classList.contains("erook")) {
         elem.classList.remove("erook")
     }
 }
 
-function compareArr(arr1, arr2){
+function compareArr(arr1, arr2) {
     const len1 = arr1.length
     const len2 = arr2.length
-    if(len1 != len2){
+    if (len1 != len2) {
         return false
     }
-    else{
-        for(let i = 0; i < len1; i++){
-            if(arr1[i] != arr2[i]){
+    else {
+        for (let i = 0; i < len1; i++) {
+            if (arr1[i] != arr2[i]) {
                 return false
             }
         }
@@ -819,49 +879,49 @@ function checkCheckmate() {
         const piece = pieces[i];
         find += possibleMoves(piece, true, 1)
     }
-    if(find == 0){
+    if (find == 0) {
         return true
     }
     return false
 }
 
-function lookforKing(a, b, i, j){
-    while(true){
+function lookforKing(a, b, i, j) {
+    while (true) {
         a = a + i
         b = b + j
-        if(a < 0 || a > 7 || b < 0 || b > 7){
+        if (a < 0 || a > 7 || b < 0 || b > 7) {
             return false
         }
         const toshow = document.getElementById(`${a},${b}`)
-        if(toshow.classList.contains("king")){
+        if (toshow.classList.contains("king")) {
             return true
         }
-        else if(toshow.classList.contains("enemy")){
+        else if (toshow.classList.contains("enemy")) {
             return false
         }
     }
 }
 
-function doit(a, b, i, j){
-    while(true){
+function doit(a, b, i, j) {
+    while (true) {
         const toshow = document.getElementById(`${a},${b}`)
-        if(toshow.hasAttribute("cant-move")){
+        if (toshow.hasAttribute("cant-move")) {
             break
         }
         toshow.classList.add("show")
         a = a - i
         b = b - j
-        if(a < 0 || a > 7 || b < 0 || b > 7){
+        if (a < 0 || a > 7 || b < 0 || b > 7) {
             break
         }
     }
 }
 
-function gameOver(socket){
+function gameOver(socket) {
     document.getElementById("gameoverheading").textContent = "YOU LOSE"
     document.getElementById("gameover").style.display = "block"
     socket.emit("gameover")
     document.getElementById("container").style.filter = "blur(5px)"
-    
+
 }
 export default Game

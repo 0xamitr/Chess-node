@@ -18,9 +18,11 @@ const io = new Server(server);
 async function main(){
     await mongoose.connect(MONGO_URL)
 }
+
 main().catch((err)=>{
     console.log(err)
 })
+
 app.use(express.json());
 
 app.use(express.static(path.join(__dirname, 'public')));
@@ -40,8 +42,15 @@ app.get('/signup', (req, res)=>{
 })
 
 app.post('/signup', (req, res)=>{
-    console.log(req.body.username);
-    console.log(req.body.password);
+    const user = new User({
+        username: req.body.username,
+        password: req.body.pasword,
+        date: new Date(),
+        elo: null,
+        profile: null,
+    })
+    user.save()
+    console.log(user)
 });
 
 setInterval(()=>{
