@@ -31,7 +31,6 @@ body{
 .box{
     height: clamp(20px, 8vw, 60px);
     width: clamp(20px, 8vw, 60px);
-    border: solid 2px black;
     text-align: center;
     line-height: clamp(20px, 8vw, 60px);;
     font-size: clamp(15px, 6vw, 45px);

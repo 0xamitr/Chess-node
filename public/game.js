@@ -19,8 +19,13 @@ function Game(socket, code, turn) {
         while((globalturn && (j < 8)) || (!globalturn && (j > -1))){
             const boxes = document.createElement('div')
             boxes.classList.add("box")
+            let t
+            if(globalturn)
+                t = j
+            else
+                t = 7-j
             if (i % 2 == 0) {
-                if (j % 2 == 0) {
+                if (t % 2 == 0) {
                     boxes.classList.add("light");
                 }
                 else {
@@ -28,7 +33,7 @@ function Game(socket, code, turn) {
                 }
             }
             else {
-                if (j % 2 != 0) {
+                if (t % 2 != 0) {
                     boxes.classList.add("light");
                 }
                 else {
