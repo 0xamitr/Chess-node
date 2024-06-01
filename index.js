@@ -2,56 +2,19 @@ import express from 'express'
 import { Server } from 'socket.io'
 import { createServer } from 'http'
 import path from 'path'
-import {mongoose} from 'mongoose'
-import User from './public/Schema/schema.js'
-import passport from 'passport'
-import LocalStrategy from 'passport-local'
 
-const MONGO_URL = process.env.MONGODB_URL
 const __dirname = path.resolve();
 const app = express();
-const PORT = process.env.PORT || 3000
+const PORT = process.env.PORT || 3005
 
 const server = createServer(app);
-const io = new Server(server);
-
-async function main(){
-    await mongoose.connect(MONGO_URL)
-}
-
-main().catch((err)=>{
-    console.log(err)
-})
-
+const io = new Server(server, {
+    cors: {
+      origin: '*',
+    }
+});
 app.use(express.json());
 
-app.use(express.static(path.join(__dirname, 'public')));
-
-app.get('/', (req, res, next)=>{
-    res.sendFile(path.join(__dirname, "index.html"))
-})
-
-app.post('/login', 
-    passport.authenticate('local', { failureRedirect: '/login' }),
-    function(req, res) {
-        res.redirect('/');
-});
-
-app.get('/signup', (req, res)=>{
-    res.sendFile(path.join(__dirname, "/public/SignUp/signup.html"))
-})
-
-app.post('/signup', (req, res)=>{
-    const user = new User({
-        username: req.body.username,
-        password: req.body.pasword,
-        date: new Date(),
-        elo: null,
-        profile: null,
-    })
-    user.save()
-    console.log(user)
-});
 
 setInterval(()=>{
     console.log(io.sockets.adapter.rooms)
@@ -69,7 +32,11 @@ io.on('connection', (socket) => {
         }, 30 * 1000)
     })
     socket.on('submit', (submit)=>{
+        console.log('code', submit)
+        console.log('Type of submit:', typeof submit);
+
         let room = (io.sockets.adapter.rooms.get(submit))
+        console.log(io.sockets.adapter.rooms)
         console.log(room)
         if(room){
             console.log(room.size)
@@ -86,32 +53,10 @@ io.on('connection', (socket) => {
             socket.disconnect();
         }
     })
-    socket.on("move", (e) => {
-        let code = Array.from(socket.rooms)[1]
-        console.log(io.sockets.adapter.rooms)
-        console.log(socket.id)
-        socket.to(code).emit("go", e);
-    });
-    socket.on("gameover", ()=>{
-        let code = Array.from(socket.rooms)[1]
-        socket.to(code).emit("over")
-        socket.disconnect()
-    })
     socket.on('disconnect', () => {
         console.log('user disconnected', socket.id)
     });
 })
-
-passport.use(new LocalStrategy(
-    function(username, password, done) {
-        User.findOne({ username: username }, function (err, user) {
-        if (err) { return done(err); }
-        if (!user) { return done(null, false); }
-        if (!user.verifyPassword(password)) { return done(null, false); }
-        return done(null, user);
-        });
-    }
-));
 
 server.listen(PORT, "0.0.0.0", ()=>{
     console.log("running")
