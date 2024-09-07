@@ -53,6 +53,21 @@ io.on('connection', (socket) => {
             socket.disconnect();
         }
     })
+    socket.on('move', (move, code)=>{
+        console.log("ok")
+        console.log(code)
+        let room = (io.sockets.adapter.rooms.get(code))
+        if(room){
+            console.log(room.size)
+            if(room.size == 2){
+                io.to(code).emit("move", move)
+            }
+            else{
+                socket.emit("error")
+            }
+        }
+    })
+
     socket.on('disconnect', () => {
         console.log('user disconnected', socket.id)
     });
