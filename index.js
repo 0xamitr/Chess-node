@@ -22,7 +22,9 @@ setInterval(()=>{
 
 io.on('connection', (socket) => {
     console.log("user connected", socket.id)
-    socket.on('code', (code)=>{
+    socket.on('code', (code, id, name)=>{
+        socket.userId = id
+        socket.name = name
         socket.join(code)
         setTimeout(()=>{
             if(io.sockets.adapter.rooms.get(code) && io.sockets.adapter.rooms.get(code).size == 1){
@@ -31,10 +33,11 @@ io.on('connection', (socket) => {
             }
         }, 30 * 1000)
     })
-    socket.on('submit', (submit)=>{
+    socket.on('submit', (submit, id, name)=>{
         console.log('code', submit)
         console.log('Type of submit:', typeof submit);
-
+        socket.userId = id
+        socket.name = name
         let room = (io.sockets.adapter.rooms.get(submit))
         console.log(io.sockets.adapter.rooms)
         console.log(room)
@@ -42,7 +45,11 @@ io.on('connection', (socket) => {
             console.log(room.size)
             if(room.size == 1){
                 socket.join(submit)
-                io.to(submit).emit("connection_established")
+                const roomSockets = Array.from(io.sockets.adapter.rooms.get(submit) || []);
+                const userIds = roomSockets.map(id => io.sockets.sockets.get(id)?.userId).filter(id => id !== undefined)
+                const names = roomSockets.map(id => io.sockets.sockets.get(id)?.name).filter(id => id !== undefined)
+                console.log("hi", userIds, names)
+                io.to(submit).emit("connection_established", userIds, names)
             }
             else{
                 socket.emit("roomfull")
