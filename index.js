@@ -4,28 +4,16 @@ import { createServer } from 'http'
 import path from 'path'
 
 const __dirname = path.resolve();
-const app = express();
+const app = expzress();
 const PORT = process.env.PORT || 3005
 
 const server = createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: [
-            'http://chess-self-two.vercel.app',
-            'http://localhost:3000',
-        ],
-        'force new connection': true,
-        methods: ['GET', 'POST'],
-        credentials: true, // Ensure credentials are allowed
+        origin: '*'
     }
 });
 
-app.use((req, res, next) => {
-    res.setHeader('Access-Control-Allow-Origin', '*');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
-    next();
-});
 app.use(express.json());
 
 setInterval(()=>{
