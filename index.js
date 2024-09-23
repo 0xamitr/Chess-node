@@ -7,11 +7,26 @@ const __dirname = path.resolve();
 const app = express();
 const PORT = process.env.PORT || 3005
 
+const allowedOrigins = [
+    'https://your-frontend-domain.com', // your production domain
+    'http://localhost:3000'              // your local development domain
+];
+
+const corsOptions = {
+    origin: function(origin, callback) {
+        // Allow requests with no origin (like mobile apps or curl requests)
+        if (!origin || allowedOrigins.indexOf(origin) !== -1) {
+            callback(null, true);
+        } else {
+            callback(new Error('Not allowed by CORS'));
+        }
+    },
+    methods: ['GET', 'POST'],
+};
+
 const server = createServer(app);
 const io = new Server(server, {
-    cors: {
-      origin: '*',
-    }
+    cors: corsOptions,
 });
 app.use(express.json());
 
