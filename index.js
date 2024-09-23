@@ -15,6 +15,7 @@ const io = new Server(server, {
             'http://localhost:3000',
         ],
         methods: ['GET', 'POST'],
+        credentials: true, // Ensure credentials are allowed
     }
 });
 
@@ -31,6 +32,7 @@ setInterval(()=>{
 }, 5000)
 
 io.on('connection', (socket) => {
+
     console.log("user connected", socket.id)
     socket.on('code', (code, id, name)=>{
         socket.userId = id
