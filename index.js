@@ -4,7 +4,7 @@ import { createServer } from 'http'
 import path from 'path'
 
 const __dirname = path.resolve();
-const app = expzress();
+const app = express();
 const PORT = process.env.PORT || 3005
 
 const server = createServer(app);
