@@ -11,15 +11,20 @@ const server = createServer(app);
 const io = new Server(server, {
     cors: {
         origin: [
-            'https://chess-self-two.vercel.app/',
+            'https://chess-self-two.vercel.app',
             'http://localhost:3000',
         ],
         methods: ['GET', 'POST'],
     }
 });
 
+app.use((req, res, next) => {
+    res.setHeader('Access-Control-Allow-Origin', '*');
+    res.setHeader('Access-Control-Allow-Methods', 'GET, POST');
+    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+    next();
+});
 app.use(express.json());
-
 
 setInterval(()=>{
     console.log(io.sockets.adapter.rooms)
