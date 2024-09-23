@@ -14,6 +14,7 @@ const io = new Server(server, {
             'http://chess-self-two.vercel.app',
             'http://localhost:3000',
         ],
+        'force new connection': true,
         methods: ['GET', 'POST'],
         credentials: true, // Ensure credentials are allowed
     }
