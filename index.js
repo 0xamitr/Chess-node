@@ -11,7 +11,7 @@ const server = createServer(app);
 const io = new Server(server, {
     cors: {
         origin: [
-            'https://chess-self-two.vercel.app',
+            'http://chess-self-two.vercel.app',
             'http://localhost:3000',
         ],
         methods: ['GET', 'POST'],
