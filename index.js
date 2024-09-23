@@ -10,10 +10,7 @@ const PORT = process.env.PORT || 3005
 const server = createServer(app);
 const io = new Server(server, {
     cors: {
-        origin: [
-            'http://chess-self-two.vercel.app',
-            'http://localhost:3000',
-        ],
+        origin: "*",
     }
 });
 
