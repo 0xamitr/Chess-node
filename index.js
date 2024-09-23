@@ -8,7 +8,7 @@ const app = express();
 const PORT = process.env.PORT || 3005
 
 const allowedOrigins = [
-    'https://your-frontend-domain.com', // your production domain
+    'https://chess-self-two.vercel.app/', // your production domain
     'http://localhost:3000'              // your local development domain
 ];
 
