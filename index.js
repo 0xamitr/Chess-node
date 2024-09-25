@@ -12,11 +12,11 @@ const isProduction = process.env.NODE_ENV === 'production';
 
 // Construct paths for certificate files
 const keyPath = isProduction 
-    ? '/etc/letsencrypt/live/socket.chessy.com/privkey.pem' 
+    ? '/etc/letsencrypt/live/socket.chessy.tech/privkey.pem' 
     : path.join(__dirname, 'certs', 'privkey.pem');
 
 const certPath = isProduction 
-    ? '/etc/letsencrypt/live/socket.chessy.com/fullchain.pem' 
+    ? '/etc/letsencrypt/live/socket.chessy.tech/fullchain.pem' 
     : path.join(__dirname, 'certs', 'fullchain.pem');
 
 let options;
