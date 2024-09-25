@@ -2,17 +2,24 @@ import express from 'express'
 import { Server } from 'socket.io'
 import { createServer } from 'http'
 import path from 'path'
+import fs from 'fs'; // Import the filesystem module
 
 const __dirname = path.resolve();
 const app = express();
 const PORT = process.env.PORT || 3005
 
-const server = createServer(app);
+const options = {
+    key: fs.readFileSync('/etc/letsencrypt/live/socket.chessy.com/privkey.pem'), // Path to your private key
+    cert: fs.readFileSync('/etc/letsencrypt/live/socket.chessy.com/fullchain.pem'), // Path to your fullchain certificate
+};
+
+const server = createServer(options, app);
 const io = new Server(server, {
     cors: {
         origin: "*",
     }
 });
+
 
 app.use(express.json());
 app.use(express.static(path.join(__dirname, 'public')));
