@@ -1,26 +1,41 @@
-import express from 'express'
-import { Server } from 'socket.io'
-import { createServer } from 'https'
-import path from 'path'
+import express from 'express';
+import { Server } from 'socket.io';
+import { createServer } from 'https';
+import path from 'path';
 import fs from 'fs';
 
-const __dirname = path.resolve();
 const app = express();
-const PORT = process.env.PORT || 3005
+const PORT = process.env.PORT || 3005;
 
-const keyPath = './etc/letsencrypt/live/socket.chessy.com/privkey.pem';
-const certPath = './etc/letsencrypt/live/socket.chessy.com/fullchain.pem';
+// Determine if we are in a production environment
+const isProduction = process.env.NODE_ENV === 'production';
 
-const options = {
-    key: fs.readFileSync(keyPath),
-    cert: fs.readFileSync(certPath),
-};
+// Construct paths for certificate files
+const keyPath = isProduction 
+    ? '/etc/letsencrypt/live/socket.chessy.com/privkey.pem' 
+    : path.join(__dirname, 'certs', 'privkey.pem');
 
-const server = createServer(options,app);
+const certPath = isProduction 
+    ? '/etc/letsencrypt/live/socket.chessy.com/fullchain.pem' 
+    : path.join(__dirname, 'certs', 'fullchain.pem');
+
+let options;
+
+try {
+    options = {
+        key: fs.readFileSync(keyPath),
+        cert: fs.readFileSync(certPath),
+    };
+} catch (error) {
+    console.error("Error reading certificate files:", error);
+    process.exit(1); // Exit if there's an error
+}
+
+const server = createServer(options, app);
 const io = new Server(server, {
     cors: {
         origin: "*",
-    }
+    },
 });
 
 app.use(express.json());
