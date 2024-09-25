@@ -2,6 +2,7 @@ import express from 'express'
 import { Server } from 'socket.io'
 import { createServer } from 'https'
 import path from 'path'
+import fs from 'fs';
 
 const __dirname = path.resolve();
 const app = express();
