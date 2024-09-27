@@ -1,37 +1,41 @@
 import express from 'express';
 import { Server } from 'socket.io';
-import { createServer } from 'https';
+import { createServer } from 'http';
 import path from 'path';
 import fs from 'fs';
 
 const app = express();
 const PORT = process.env.PORT || 3005;
 
-// Determine if we are in a production environment
 const isProduction = process.env.NODE_ENV === 'production';
 
-// Construct paths for certificate files
-const keyPath = isProduction 
-    ? '/etc/letsencrypt/live/socket.chessy.tech/privkey.pem' 
-    : path.join(__dirname, 'certs', 'privkey.pem');
+let keyPath
+let certPath
 
-const certPath = isProduction 
-    ? '/etc/letsencrypt/live/socket.chessy.tech/fullchain.pem' 
-    : path.join(__dirname, 'certs', 'fullchain.pem');
+if (isProduction) {
+    keyPath = '/etc/letsencrypt/live/socket.chessy.tech/privkey.pem'
+    certPath = '/etc/letsencrypt/live/socket.chessy.tech/fullchain.pem'
+}
 
 let options;
 
-try {
-    options = {
-        key: fs.readFileSync(keyPath),
-        cert: fs.readFileSync(certPath),
-    };
-} catch (error) {
-    console.error("Error reading certificate files:", error);
-    process.exit(1); // Exit if there's an error
+if (isProduction) {
+    try {
+        options = {
+            key: fs.readFileSync(keyPath),
+            cert: fs.readFileSync(certPath),
+        };
+    } catch (error) {
+        console.error("Error reading certificate files:", error);
+        process.exit(1); // Exit if there's an error
+    }
 }
+let server;
+if (isProduction)
+    server = createServer(options, app);
+else
+    server = createServer(app);
 
-const server = createServer(options, app);
 const io = new Server(server, {
     cors: {
         origin: "*",
@@ -40,25 +44,25 @@ const io = new Server(server, {
 
 app.use(express.json());
 
-setInterval(()=>{
+setInterval(() => {
     console.log(io.sockets.adapter.rooms)
 }, 5000)
 
 io.on('connection', (socket) => {
 
     console.log("user connected", socket.id)
-    socket.on('code', (code, id, name)=>{
+    socket.on('code', (code, id, name) => {
         socket.userId = id
         socket.name = name
         socket.join(code)
-        setTimeout(()=>{
-            if(io.sockets.adapter.rooms.get(code) && io.sockets.adapter.rooms.get(code).size == 1){
+        setTimeout(() => {
+            if (io.sockets.adapter.rooms.get(code) && io.sockets.adapter.rooms.get(code).size == 1) {
                 console.log("gesdf")
                 socket.disconnect();
             }
         }, 30 * 1000)
     })
-    socket.on('submit', (submit, id, name)=>{
+    socket.on('submit', (submit, id, name) => {
         console.log('code', submit)
         console.log('Type of submit:', typeof submit);
         socket.userId = id
@@ -66,9 +70,9 @@ io.on('connection', (socket) => {
         let room = (io.sockets.adapter.rooms.get(submit))
         console.log(io.sockets.adapter.rooms)
         console.log(room)
-        if(room){
+        if (room) {
             console.log(room.size)
-            if(room.size == 1){
+            if (room.size == 1) {
                 socket.join(submit)
                 const roomSockets = Array.from(io.sockets.adapter.rooms.get(submit) || []);
                 const userIds = roomSockets.map(id => io.sockets.sockets.get(id)?.userId).filter(id => id !== undefined)
@@ -76,38 +80,38 @@ io.on('connection', (socket) => {
                 console.log("hi", userIds, names)
                 io.to(submit).emit("connection_established", userIds, names)
             }
-            else{
+            else {
                 socket.emit("roomfull")
                 socket.disconnect();
             }
         }
-        else{
+        else {
             socket.disconnect();
         }
     })
-    socket.on('move', (move, code)=>{
+    socket.on('move', (move, code) => {
         console.log(code)
         let room = (io.sockets.adapter.rooms.get(code))
-        if(room){
+        if (room) {
             console.log(room.size)
-            if(room.size == 2){
+            if (room.size == 2) {
                 io.to(code).emit("move", move)
             }
-            else{
+            else {
                 socket.emit("error")
             }
         }
     })
 
-    socket.on('endGame',  (code)=>{
+    socket.on('endGame', (code) => {
         console.log(code)
         let room = (io.sockets.adapter.rooms.get(code))
-        if(room){
+        if (room) {
             console.log(room.size)
-            if(room.size == 2){
+            if (room.size == 2) {
                 io.to(code).emit("endGame")
             }
-            else{
+            else {
                 socket.emit("error")
             }
         }
@@ -118,6 +122,6 @@ io.on('connection', (socket) => {
     });
 })
 
-server.listen(PORT, "0.0.0.0", ()=>{
+server.listen(PORT, "0.0.0.0", () => {
     console.log("running")
 })
