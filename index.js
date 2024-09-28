@@ -1,7 +1,6 @@
 import express from 'express';
 import { Server } from 'socket.io';
 import { createServer } from 'http';
-import path from 'path';
 import fs from 'fs';
 
 const app = express();
@@ -49,7 +48,6 @@ setInterval(() => {
 }, 5000)
 
 io.on('connection', (socket) => {
-
     console.log("user connected", socket.id)
     socket.on('code', (code, id, name) => {
         socket.userId = id
@@ -86,6 +84,7 @@ io.on('connection', (socket) => {
             }
         }
         else {
+            socket.emit("roomnotfound")
             socket.disconnect();
         }
     })
