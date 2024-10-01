@@ -1,6 +1,6 @@
 import express from 'express';
 import { Server } from 'socket.io';
-import { createServer } from 'http';
+import { createServer } from 'https';
 import fs from 'fs';
 
 const app = express();
