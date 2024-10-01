@@ -16,6 +16,7 @@ if (isProduction) {
     certPath = '/etc/letsencrypt/live/socket.chessy.tech/fullchain.pem'
 }
 
+console.log(isProduction)
 let options;
 
 if (isProduction) {
