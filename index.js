@@ -1,6 +1,6 @@
 import express from 'express';
 import { Server } from 'socket.io';
-import { createServer } from 'https';
+import { createServer } from 'http';
 import fs from 'fs';
 
 const app = express();
@@ -41,15 +41,48 @@ const io = new Server(server, {
         origin: "*",
     },
 });
+const onlineUsers = {}
 
 app.use(express.json());
 
 setInterval(() => {
     console.log(io.sockets.adapter.rooms)
+    console.log(onlineUsers)
 }, 5000)
 
 io.on('connection', (socket) => {
     console.log("user connected", socket.id)
+    const userId = socket.handshake.query.id;
+
+    if(userId)
+        onlineUsers[userId] = socket.id;
+
+    socket.on('challenge', id => {
+        const toId = onlineUsers[id]
+        const fromId = onlineUsers[userId]
+        console.log("fsdfjlkj")
+        if (toId) {
+            console.log("fds")
+            io.to(toId).emit('challenge-received', fromId)
+        }
+    })
+
+    socket.on('challenge-accepted', (from) => {
+        const toId = onlineUsers[userId]
+        console.log("dsafsdfsdlkfjkdljfsklfjsldfjlk")
+        const room = from + toId
+        io.to(from).emit('start-game', { room });
+        io.to(toId).emit('start-game', { room });
+
+        socket.join(room)
+        console.log(from)
+        console.log(from)
+        console.log(io.sockets.sockets)
+        io.sockets.sockets.get(from).join(room)
+        
+        io.to(room).emit("connection_established", userId, room)
+    })
+
     socket.on('code', (code, id, name) => {
         socket.userId = id
         socket.name = name
@@ -61,6 +94,7 @@ io.on('connection', (socket) => {
             }
         }, 30 * 1000)
     })
+
     socket.on('submit', (submit, id, name) => {
         console.log('code', submit)
         console.log('Type of submit:', typeof submit);
@@ -118,6 +152,7 @@ io.on('connection', (socket) => {
     })
 
     socket.on('disconnect', () => {
+        delete onlineUsers[userId]
         console.log('user disconnected', socket.id)
     });
 })
