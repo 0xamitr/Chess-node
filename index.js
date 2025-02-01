@@ -53,34 +53,33 @@ setInterval(() => {
 io.on('connection', (socket) => {
     console.log("user connected", socket.id)
     const userId = socket.handshake.query.id;
+    const username = socket.handshake.query.username;
 
-    if(userId)
+
+    if (userId)
         onlineUsers[userId] = socket.id;
 
     socket.on('challenge', id => {
         const toId = onlineUsers[id]
         const fromId = onlineUsers[userId]
-        console.log("fsdfjlkj")
         if (toId) {
             console.log("fds")
-            io.to(toId).emit('challenge-received', fromId)
+            io.to(toId).emit('challenge-received', fromId, username);
         }
     })
 
     socket.on('challenge-accepted', (from) => {
         const toId = onlineUsers[userId]
-        console.log("dsafsdfsdlkfjkdljfsklfjsldfjlk")
         const room = from + toId
         io.to(from).emit('start-game', { room });
         io.to(toId).emit('start-game', { room });
 
         socket.join(room)
-        console.log(from)
-        console.log(from)
-        console.log(io.sockets.sockets)
         io.sockets.sockets.get(from).join(room)
-        
-        io.to(room).emit("connection_established", userId, room)
+        console.log("holy shit")
+        const opponentId = io.sockets.sockets.get(from).handshake.query.id
+        const opponentName = io.sockets.sockets.get(from).handshake.query.username
+        io.to(room).emit("connection_established", userId, room, [{id: opponentId, name: opponentName}, {id: userId, name: username}])
     })
 
     socket.on('code', (code, id, name) => {
@@ -98,8 +97,6 @@ io.on('connection', (socket) => {
     socket.on('submit', (submit, id, name) => {
         console.log('code', submit)
         console.log('Type of submit:', typeof submit);
-        socket.userId = id
-        socket.name = name
         let room = (io.sockets.adapter.rooms.get(submit))
         console.log(io.sockets.adapter.rooms)
         console.log(room)
@@ -107,11 +104,9 @@ io.on('connection', (socket) => {
             console.log(room.size)
             if (room.size == 1) {
                 socket.join(submit)
-                const roomSockets = Array.from(io.sockets.adapter.rooms.get(submit) || []);
-                const userIds = roomSockets.map(id => io.sockets.sockets.get(id)?.userId).filter(id => id !== undefined)
-                const names = roomSockets.map(id => io.sockets.sockets.get(id)?.name).filter(id => id !== undefined)
-                console.log("hi", userIds, names)
-                io.to(submit).emit("connection_established", userIds, names)
+                const opponentId = io.sockets.sockets.get(from).handshake.query.id
+                const opponentName = io.sockets.sockets.get(from).handshake.query.username
+                io.to(submit).emit("connection_established", userId, submit [{id: opponentId, name: opponentName}, {id: userId, name: username}])
             }
             else {
                 socket.emit("roomfull")
