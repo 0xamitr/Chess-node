@@ -16,10 +16,11 @@
     "fs": "^0.0.1-security",
     "http": "^0.0.1-security",
     "mongodb": "^6.3.0",
-    "mongoose": "^8.1.1",
+    "mongoose": "^8.9.6",
     "nodemon": "^3.0.3",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
+    "redis": "^4.7.0",
     "socket.io": "^4.7.4",
     "socket.io-client": "^4.7.4"
   }
