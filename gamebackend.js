@@ -1,7 +1,7 @@
 import uploadGame from "./uploadgame.js";
 
 export default class GameBackend {
-    constructor(isPlayerWhite, player1Id, player2Id, player1Name, player2Name, roomCode) {
+    constructor(player1Id, player2Id, player1Name, player2Name, roomCode) {
         this.code = roomCode;
         this.player1Name = player1Name;
         this.player2Name = player2Name;
@@ -13,48 +13,50 @@ export default class GameBackend {
         this.turn = true; //whites turn
         this.history = [JSON.parse(JSON.stringify(this.board))];
         this.check = false;
-        this.blacktime = 600;
+
         this.whitetime = 600;
-        this.whitestarttime = null;
-        this.blackstarttime = null;
+        this.lastwhitetime = Date.now();
+
+        this.blacktime = 600;
+        this.lastblacktime = null;
+
         this.timer = null;
-        this.startTimer()
-        this.isPlayerWhite = isPlayerWhite
+        this.tempmove = 0;
+        this.totalmoves = 0;
+        this.startTimer();
     }
 
     startTimer() {
-        this.whitestarttime = Date.now();
-        this.blackstarttime = Date.now();
         this.timer = setInterval(() => {
+            console.log("timer", this.whitetime, this.blacktime)
             if (this.turn) {
                 const currentTime = Date.now();
-                const elapsed = (currentTime - this.whitestarttime) / 1000; // Time in seconds
+                const elapsed = (currentTime - this.lastwhitetime) / 1000; // Time in seconds
 
                 this.whitetime -= elapsed;
 
                 if (this.whitetime <= 0) {
-                    this.whitetime = 0;
+                    console.log("suck my nuts")
+                    this.time = 0;
                     clearInterval(this.timer);
                     this.endGame();
                 }
-                this.whitestarttime = currentTime;
-                this.blackstarttime = Date.now();
+                this.lastwhitetime = currentTime;
             }
             else {
                 const currentTime = Date.now();
-                const elapsed = (currentTime - this.blackstarttime) / 1000; // Time in seconds
-
+                const elapsed = (currentTime - this.lastblacktime) / 1000;
                 this.blacktime -= elapsed;
 
                 if (this.blacktime <= 0) {
-                    this.blacktime = 0;
+                    console.log("suck my nuts")
+                    this.time = 0;
                     clearInterval(this.timer);
                     this.endGame();
                 }
-                this.blacktime = currentTime;
-                this.whitestarttime = Date.now(); // Reset for accurate tracking
+                this.lastblacktime = currentTime;
             }
-        }, 100);
+        }, 1000);
     }
 
     initializeBoard() {
@@ -77,7 +79,6 @@ export default class GameBackend {
         const fromCol = from.charCodeAt(0) - 'a'.charCodeAt(0);
         const toRow = 8 - parseInt(to[1]);
         const toCol = to.charCodeAt(0) - 'a'.charCodeAt(0);
-
         return { from: [fromRow, fromCol], to: [toRow, toCol] }
     }
 
@@ -518,8 +519,8 @@ export default class GameBackend {
         if (Array.isArray(move)) {
             //promotion
             if (move[1].hasOwnProperty('promotion')) {
-                this.applyMove(move[0])
                 this.pushMove({ from: move[0].from, to: move[0].to }, move[1].promotion, this.isCheck())
+                this.applyMove(move[0])
                 const toRow = 8 - parseInt(move[0].to[1]);
                 const toCol = move[0].to.charCodeAt(0) - 'a'.charCodeAt(0);
                 this.board[toRow][toCol] = move[1].promotion
@@ -544,7 +545,10 @@ export default class GameBackend {
             }
             this.turn = !this.turn
             if (this.turn)
-                this.startTimer = Date.now()
+                this.lastwhitetime = Date.now()
+            else
+                this.lastblacktime = Date.now()
+
             this.totalmoves++
             this.tempmove = this.totalmoves
             this.history.push(JSON.parse(JSON.stringify(this.board)))
@@ -564,7 +568,9 @@ export default class GameBackend {
             this.history.push(JSON.parse(JSON.stringify(this.board)))
             this.turn = !this.turn
             if (this.turn)
-                this.startTimer = Date.now()
+                this.lastwhitetime = Date.now()
+            else
+                this.lastblacktime = Date.now()
             this.totalmoves++
             this.tempmove = this.totalmoves
         }
@@ -608,9 +614,12 @@ export default class GameBackend {
         }
         return ""
     }
-    
+
     pushMove(move, promotion, isCheck) {
-        this.movelist.push(move)
+        if (promotion)
+            this.movelist.push([move, promotion])
+        else
+            this.movelist.push(move)
         if (move.length > 1) {
             if (Math.abs(move[1].from[0].charCodeAt(0) - move[1].to[0].charCodeAt(0)) == 2)
                 this.moves.push('0-0')
@@ -672,7 +681,7 @@ export default class GameBackend {
         return true
     }
 
-    
+
 
     checkCheckmate() {
         for (let i = 0; i < 8; i++) {
@@ -732,13 +741,19 @@ export default class GameBackend {
             pgn: pgns,
             creation: new Date(),
             moves: this.moves.length,
-            winner: { id: this.isPlayerWhite? this.player2Id: this.player1Id, name: this.isPlayerWhite? this.player2Name: this.player1Name, color: this.isPlayerWhite ? "black" : "white" },
+            winner: { id: this.isPlayerWhite ? this.player2Id : this.player1Id, name: this.isPlayerWhite ? this.player2Name : this.player1Name, color: this.isPlayerWhite ? "black" : "white" },
             game_id: this.code,
             movelist: this.movelist,
-            players: [{ id: this.player1Id, name: this.player1Name, color: this.isPlayerWhite ? "white": "black" }, { id: this.player2Id, name: this.player2Name, color: !this.isPlayerWhite? "white": "black"}]
-            
+            players: [{ id: this.player1Id, name: this.player1Name, color: this.isPlayerWhite ? "white" : "black" }, { id: this.player2Id, name: this.player2Name, color: !this.isPlayerWhite ? "white" : "black" }]
+
         })
         // console.log(this.moves)
-            //end game
+        //end game
+    }
+    cleanup() {
+        if (this.timer) {
+            clearInterval(this.timer);
+            console.log("Game interval cleared.");
+        }
     }
 }
