@@ -1,4 +1,5 @@
 import uploadGame from "./uploadgame.js";
+import {clientRoom, games, io, onlineUsers} from "./index.js";
 
 export default class GameBackend {
     constructor(player1Id, player2Id, player1Name, player2Name, roomCode) {
@@ -24,11 +25,21 @@ export default class GameBackend {
         this.tempmove = 0;
         this.totalmoves = 0;
         this.startTimer();
+        this.roomCode = roomCode;
+        this.enPassant = 0
+
+        this.whitekingMove = false
+        this.blackkingMove = false
+
+        this.whiteleftrookMove = false
+        this.whiterightrookMove = false
+        this.blackleftrookMove = false
+        this.blackrightrookMove = false
     }
 
     startTimer() {
         this.timer = setInterval(() => {
-            console.log("timer", this.whitetime, this.blacktime)
+            //console.log("timer", this.whitetime, this.blacktime)
             if (this.turn) {
                 const currentTime = Date.now();
                 const elapsed = (currentTime - this.lastwhitetime) / 1000; // Time in seconds
@@ -36,9 +47,8 @@ export default class GameBackend {
                 this.whitetime -= elapsed;
 
                 if (this.whitetime <= 0) {
-                    console.log("suck my nuts")
+                    //console.log("suck my nuts")
                     this.time = 0;
-                    clearInterval(this.timer);
                     this.endGame();
                 }
                 this.lastwhitetime = currentTime;
@@ -49,9 +59,8 @@ export default class GameBackend {
                 this.blacktime -= elapsed;
 
                 if (this.blacktime <= 0) {
-                    console.log("suck my nuts")
+                    //console.log("suck my nuts")
                     this.time = 0;
-                    clearInterval(this.timer);
                     this.endGame();
                 }
                 this.lastblacktime = currentTime;
@@ -122,6 +131,7 @@ export default class GameBackend {
         const piece = this.board[fromRow][fromCol];
         const targetPiece = this.board[toRow][toCol];
         if (piece === '.') return false;
+
         if (targetPiece != '.' && this.isSamePlayer(piece, targetPiece)) {
             return false;
         }
@@ -293,28 +303,31 @@ export default class GameBackend {
             return false
         if (!this.turn && this.board[fromRow][fromCol] != 'k')
             return false
-        if (this.turn && this.kingMove == false) {
+        if (this.turn && this.whitekingMove == false) {
             if (fromRow == toRow && fromCol == toCol + 2) {
+                console.log("why")
                 if (this.board[fromRow][fromCol - 1] != '.' || this.board[fromRow][fromCol - 2] != '.')
                     return false
                 if (this.check)
                     return false
-                if (this.leftrookMove == true)
+                if (this.whiteleftrookMove == true)
                     return false
                 if (this.isSquareUnderAttack(fromRow, fromCol - 1, this.turn))
                     return false
                 if (this.isSquareUnderAttack(fromRow, fromCol - 2, this.turn))
                     return false
+                console.log(1);
                 return true
             }
             else if (fromRow == toRow && fromCol == toCol - 2) {
+                console.log("whyf")
                 if (this.board[fromRow][fromCol + 1] != '.' || this.board[fromRow][fromCol + 2] != '.') {
                     return false
                 }
                 if (this.check) {
                     return false
                 }
-                if (this.rightrookMove == true) {
+                if (this.whiterightrookMove == true) {
                     return false
                 }
                 if (this.isSquareUnderAttack(fromRow, fromCol + 1, this.turn)) {
@@ -323,34 +336,39 @@ export default class GameBackend {
                 if (this.isSquareUnderAttack(fromRow, fromCol + 2, this.turn)) {
                     return false
                 }
+                console.log(1)
                 return true
             }
         }
-        else if (this.kingMove == false) {
+        if (!this.turn && this.blackkingMove == false) {
             if (fromRow == toRow && fromCol == toCol + 2) {
+                console.log("whyb")
                 if (this.board[fromRow][fromCol - 1] != '.' || this.board[fromRow][fromCol - 2] != '.')
                     return false
                 if (this.check)
                     return false
-                if (this.leftrookMove == true)
+                if (this.blackrightrookMove == true)
                     return false
                 if (this.isSquareUnderAttack(fromRow, fromCol - 1, this.turn))
                     return false
                 if (this.isSquareUnderAttack(fromRow, fromCol - 2, this.turn))
                     return false
+                console.log(1)
                 return true
             }
             else if (fromRow == toRow && fromCol == toCol - 2) {
+                console.log("whyba")
                 if (this.board[fromRow][fromCol + 1] != '.' || this.board[fromRow][fromCol + 2] != '.')
                     return false
                 if (this.check)
                     return false
-                if (this.rightrookMove == true)
+                if (this.blackleftrookMove == true)
                     return false
                 if (this.isSquareUnderAttack(fromRow, fromCol + 1, this.turn))
                     return false
                 if (this.isSquareUnderAttack(fromRow, fromCol + 2, this.turn))
                     return false
+                console.log(1)
                 return true
             }
         }
@@ -365,7 +383,7 @@ export default class GameBackend {
     }
 
     // makeMove(from, to) {
-    //     console.log(from, to)
+    //     //console.log(from, to)
     //     if (!this.turn)
     //         return false
     //     const fromRow = 8 - parseInt(from[1]);
@@ -507,15 +525,25 @@ export default class GameBackend {
     }
 
     acceptMove(move) {
-        // console.log("how", this.getmoves())
+        if(Array.isArray(move)){
+            if(!this.isMoveValid(move[0].from, move[0].to))
+                return false
+            if(move[1] != 'enPassant'){
+                if(!this.isMoveValid(move[1].from, move[1].to))
+                    return false
+            }
+        }
+        else if(!this.isMoveValid(move.from, move.to))
+            return false
+        // //console.log("how", this.getmoves())
         let movestr = ""
         let num = 1;
-        // console.log(this.getmoves())
+        // //console.log(this.getmoves())
         for (let i = 0; i < this.getmoves().length; i++) {
             movestr += `${num}. ${this.getmoves()[i++]} ${this.getmoves()[i]} `
             num++;
         }
-        // console.log(movestr)
+        // //console.log(movestr)
         if (Array.isArray(move)) {
             //promotion
             if (move[1].hasOwnProperty('promotion')) {
@@ -536,9 +564,27 @@ export default class GameBackend {
             }
             //castling
             else {
+                let fromRow = 8 - parseInt(move[1].from[1])
+                let fromCol = move[1].from[0].charCodeAt(0) - 'a'.charCodeAt(0)
+                console.log(fromRow, fromCol)
+                if(this.turn){
+                    this.whitekingMove = true
+                    if(fromRow == 7 && fromCol == 7)
+                        this.whiterightrookMove = true
+                    else if(fromRow == 7 && fromCol == 0){
+                        this.whiteleftrookMove = true
+                    }
+                }
+                else{
+                    this.blackkingMove = true
+                    if(fromRow == 0 && fromCol == 7)
+                        this.blackleftrookMove = true
+                    else if(fromRow == 0 && fromCol == 0)
+                        this.blackrightrookMove = true
+                }
                 for (let i = 0; i < move.length; i++) {
                     this.applyMove(move[i])
-                    if (this.isCheck())
+                    if (this.isCheck()) // confused about this
                         this.checkCheckmate()
                 }
                 this.pushMove(move, undefined, this.isCheck())
@@ -556,6 +602,33 @@ export default class GameBackend {
         }
         //rest of the moves
         else {
+            let fromRow = 8 - parseInt(move.from[1])
+            let fromCol = move.from[0].charCodeAt(0) - 'a'.charCodeAt(0)
+
+            if(this.board[fromRow][fromCol] == 'k' || this.board[fromRow][fromCol] == 'K'){
+                if(this.turn)
+                    this.whitekingMove = true
+                else
+                    this.blackkingMove = true
+            }
+            if(this.board[fromRow][fromCol] == 'r' || this.board[fromRow][fromCol] == 'R'){
+                console.log("roook moved")
+                console.log(fromRow, fromCol)
+                if(this.turn){
+                    console.log("white rook moved")
+                    if(fromRow == 7 && fromCol == 0)
+                        this.whiteleftrookMove = true
+                    if(fromRow == 7 && fromCol == 7)
+                        this.whiterightrookMove = true
+                }
+                else{
+                    console.log("black rook moved")
+                    if(fromRow == 0 && fromCol == 0)
+                        this.blackrightrookMove = true
+                    if(fromRow == 0 && fromCol == 7)
+                        this.blackleftrookMove = true
+                }
+            }
             if (move.from[1] == '2' && move.to[1] == '4')
                 this.enPassant = move.from.charCodeAt(0) - 'a'.charCodeAt(0)
             else if (move.from[1] == '7' && move.to[1] == '5')
@@ -578,6 +651,7 @@ export default class GameBackend {
             this.checkCheckmate()
         else
             this.checkStalemate()
+        return true
     }
 
     getDisambiguation(coords) {
@@ -732,7 +806,7 @@ export default class GameBackend {
     }
 
     endGame() {
-        console.log("hello shut the fuck up")
+        //console.log("hello shut the fuck up")
         let pgns = ""
         for (let i = 0; i < this.moves.length; i++) {
             pgns += `${i + 1}. ${this.moves[i]} `
@@ -747,13 +821,28 @@ export default class GameBackend {
             players: [{ id: this.player1Id, name: this.player1Name, color: this.isPlayerWhite ? "white" : "black" }, { id: this.player2Id, name: this.player2Name, color: !this.isPlayerWhite ? "white" : "black" }]
 
         })
-        // console.log(this.moves)
+        this.cleanup()
+        // //console.log(this.moves)
         //end game
     }
     cleanup() {
+        // delete the mapping of playerId to the room they are in
+        delete clientRoom[this.player1Id]
+        delete clientRoom[this.player2Id]
+
+        // delete the store game
+        delete games[this.roomCode]
+
+        // emit game over
+        io.to(this.roomCode).emit("gameover")
+
+        // both players leave the room
+        io.sockets.sockets.get(onlineUsers[this.player1Id]).leave(this.roomCode)
+        io.sockets.sockets.get(onlineUsers[this.player2Id]).leave(this.roomCode)
+
         if (this.timer) {
             clearInterval(this.timer);
-            console.log("Game interval cleared.");
+            //console.log("Game interval cleared.");
         }
     }
 }
