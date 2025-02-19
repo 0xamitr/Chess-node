@@ -1,5 +1,5 @@
 import uploadGame from "./uploadgame.js";
-import {clientRoom, games, io, onlineUsers} from "./index.js";
+import { clientRoom, games, io, onlineUsers } from "./index.js";
 
 export default class GameBackend {
     constructor(player1Id, player2Id, player1Name, player2Name, roomCode) {
@@ -49,7 +49,7 @@ export default class GameBackend {
                 if (this.whitetime <= 0) {
                     //console.log("suck my nuts")
                     this.time = 0;
-                    this.endGame();
+                    this.endGame("black");
                 }
                 this.lastwhitetime = currentTime;
             }
@@ -61,7 +61,7 @@ export default class GameBackend {
                 if (this.blacktime <= 0) {
                     //console.log("suck my nuts")
                     this.time = 0;
-                    this.endGame();
+                    this.endGame("white");
                 }
                 this.lastblacktime = currentTime;
             }
@@ -525,15 +525,15 @@ export default class GameBackend {
     }
 
     acceptMove(move) {
-        if(Array.isArray(move)){
-            if(!this.isMoveValid(move[0].from, move[0].to))
+        if (Array.isArray(move)) {
+            if (!this.isMoveValid(move[0].from, move[0].to))
                 return false
-            if(move[1] != 'enPassant'){
-                if(!this.isMoveValid(move[1].from, move[1].to))
+            if (move[1] != 'enPassant') {
+                if (!this.isMoveValid(move[1].from, move[1].to))
                     return false
             }
         }
-        else if(!this.isMoveValid(move.from, move.to))
+        else if (!this.isMoveValid(move.from, move.to))
             return false
         // //console.log("how", this.getmoves())
         let movestr = ""
@@ -559,7 +559,10 @@ export default class GameBackend {
                 this.applyMove(move[0])
                 const toRow = 8 - parseInt(move[0].to[1]);
                 const toCol = move[0].to.charCodeAt(0) - 'a'.charCodeAt(0);
-                this.board[toRow + 1][toCol] = '.'
+                if (this.turn)
+                    this.board[toRow + 1][toCol] = '.'
+                else
+                    this.board[toRow - 1][toCol] = '.'
                 this.enPassant = 0
             }
             //castling
@@ -567,19 +570,19 @@ export default class GameBackend {
                 let fromRow = 8 - parseInt(move[1].from[1])
                 let fromCol = move[1].from[0].charCodeAt(0) - 'a'.charCodeAt(0)
                 console.log(fromRow, fromCol)
-                if(this.turn){
+                if (this.turn) {
                     this.whitekingMove = true
-                    if(fromRow == 7 && fromCol == 7)
+                    if (fromRow == 7 && fromCol == 7)
                         this.whiterightrookMove = true
-                    else if(fromRow == 7 && fromCol == 0){
+                    else if (fromRow == 7 && fromCol == 0) {
                         this.whiteleftrookMove = true
                     }
                 }
-                else{
+                else {
                     this.blackkingMove = true
-                    if(fromRow == 0 && fromCol == 7)
+                    if (fromRow == 0 && fromCol == 7)
                         this.blackleftrookMove = true
-                    else if(fromRow == 0 && fromCol == 0)
+                    else if (fromRow == 0 && fromCol == 0)
                         this.blackrightrookMove = true
                 }
                 for (let i = 0; i < move.length; i++) {
@@ -605,27 +608,27 @@ export default class GameBackend {
             let fromRow = 8 - parseInt(move.from[1])
             let fromCol = move.from[0].charCodeAt(0) - 'a'.charCodeAt(0)
 
-            if(this.board[fromRow][fromCol] == 'k' || this.board[fromRow][fromCol] == 'K'){
-                if(this.turn)
+            if (this.board[fromRow][fromCol] == 'k' || this.board[fromRow][fromCol] == 'K') {
+                if (this.turn)
                     this.whitekingMove = true
                 else
                     this.blackkingMove = true
             }
-            if(this.board[fromRow][fromCol] == 'r' || this.board[fromRow][fromCol] == 'R'){
+            if (this.board[fromRow][fromCol] == 'r' || this.board[fromRow][fromCol] == 'R') {
                 console.log("roook moved")
                 console.log(fromRow, fromCol)
-                if(this.turn){
+                if (this.turn) {
                     console.log("white rook moved")
-                    if(fromRow == 7 && fromCol == 0)
+                    if (fromRow == 7 && fromCol == 0)
                         this.whiteleftrookMove = true
-                    if(fromRow == 7 && fromCol == 7)
+                    if (fromRow == 7 && fromCol == 7)
                         this.whiterightrookMove = true
                 }
-                else{
+                else {
                     console.log("black rook moved")
-                    if(fromRow == 0 && fromCol == 0)
+                    if (fromRow == 0 && fromCol == 0)
                         this.blackrightrookMove = true
-                    if(fromRow == 0 && fromCol == 7)
+                    if (fromRow == 0 && fromCol == 7)
                         this.blackleftrookMove = true
                 }
             }
@@ -751,7 +754,7 @@ export default class GameBackend {
             }
         }
         // alert("Stalemate! It's a draw")
-        this.endGame()
+        this.endGame("draw")
         return true
     }
 
@@ -785,7 +788,10 @@ export default class GameBackend {
             }
         }
         // alert("Checkmate! YOU LOSE");
-        this.endGame()
+        if(this.turn)
+            this.endGame("black")
+        else
+            this.endGame("white")
         return true; // Return true if no valid moves found, meaning it's checkmate
     }
 
@@ -805,20 +811,47 @@ export default class GameBackend {
         };
     }
 
-    endGame() {
+    endGame(result) {
         //console.log("hello shut the fuck up")
         let pgns = ""
         for (let i = 0; i < this.moves.length; i++) {
             pgns += `${i + 1}. ${this.moves[i]} `
         }
+        let winner
+        if(result == 'draw'){
+            winner = null
+        }
+        else if(result == 'black'){
+            winner = {
+                id: this.player1Id,
+                name: this.player1Name,
+                color: "white"
+            }
+        }
+        else if(result == 'white'){
+            winner = {
+                id: this.player2Id,
+                name: this.player2Name,
+                color: "black"
+            }
+        }
         uploadGame({
             pgn: pgns,
             creation: new Date(),
             moves: this.moves.length,
-            winner: { id: this.isPlayerWhite ? this.player2Id : this.player1Id, name: this.isPlayerWhite ? this.player2Name : this.player1Name, color: this.isPlayerWhite ? "black" : "white" },
+            winner: winner,
             game_id: this.code,
             movelist: this.movelist,
-            players: [{ id: this.player1Id, name: this.player1Name, color: this.isPlayerWhite ? "white" : "black" }, { id: this.player2Id, name: this.player2Name, color: !this.isPlayerWhite ? "white" : "black" }]
+            players: [{
+                id: this.player1Id,
+                name: this.player1Name,
+                color: "white"
+            },
+            {
+                id: this.player2Id,
+                name: this.player2Name,
+                color: "black"
+            }]
 
         })
         this.cleanup()
