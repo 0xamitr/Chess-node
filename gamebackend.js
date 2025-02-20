@@ -789,9 +789,9 @@ export default class GameBackend {
         }
         // alert("Checkmate! YOU LOSE");
         if(this.turn)
-            this.endGame("black")
-        else
             this.endGame("white")
+        else
+            this.endGame("black")
         return true; // Return true if no valid moves found, meaning it's checkmate
     }
 
