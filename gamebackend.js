@@ -243,6 +243,14 @@ export default class GameBackend {
         } else {
             if (this.enPassant != 0) {
                 if (Math.abs(fromCol - toCol) == 1 && fromRow + direction == toRow && toCol == this.enPassant) {
+                    if(isWhite){
+                        if(this.board[fromRow][fromCol+1] != 'p')
+                            return false;
+                    }
+                    else{
+                        if(this.board[fromRow][fromCol-1] != 'P')
+                            return false;
+                    }
                     return true
                 }
             }
